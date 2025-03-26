@@ -384,6 +384,7 @@ while True:
     date = int(current_time.strftime("%d"))
     year = current_time.strftime("%Y")
     if (minute ==0) and (seconds == 0) and (hour == 6):
+        print("Condition A is triggering the API call")
         aqius_prior = ""
         mainus_prior = ""
         print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -392,7 +393,7 @@ while True:
         aqius, mainus = get_phnom_penh_aq()
 
         message = f'''
-                    {date}/{month}/{year} {hour}:{minute}\n
+                    {date}/{month}/{year} {hour}:{minute:02}\n
                     =====ភាសាខ្មែរ=====\n
                     {morning_message_kh(aqius, mainus)}\n
                     =====English=====\n
@@ -407,7 +408,8 @@ while True:
         time.sleep(60)
 
     # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
-    if (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21):
+    elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21):
+        print("Condition B is triggering the API call")
         change = None
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
         print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -432,7 +434,7 @@ while True:
                     change = ["improving", previous_category, current_category]
 
             message = f'''
-            {date}/{month}/{year} {hour}:{minute}\n
+            {date}/{month}/{year} {hour}:{minute:02}\n
                 =====ភាសាខ្មែរ=====\n
                 {update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
                 =====English=====\n
@@ -450,37 +452,43 @@ while True:
         elif get_aqi_category(aqius) == "moderate":
             if (minute % 60 == 0) and (seconds == 0):
                 update()
-                time.sleep(60)
+                time.sleep(61)
         elif get_aqi_category(aqius) == "unhealthy for sensitive groups":
             if (minute % 30 == 0) and (seconds == 0):
                 update()
-                time.sleep(60)
+                time.sleep(61)
         elif get_aqi_category(aqius) == "unhealthy":
             if (minute % 15 == 0) and (seconds == 0):
                 update()
-                time.sleep(60)
+                time.sleep(61)
         elif get_aqi_category(aqius) == "very unhealthy":
             if (minute % 10 == 0) and (seconds == 0):
                 update()
-                time.sleep(60)
+                time.sleep(61)
         elif get_aqi_category(aqius) == "hazardous":
             if (minute % 5 == 0) and (seconds == 0):
                 update()
-                time.sleep(60)
-        elif (minute == 0) and (seconds == 30) and (hour == 21):
-            message = f'''
-                \t=====ភាសាខ្មែរ=====\n
-                {signoff_kh()}\n
-                =====English=====\n
-                {signoff_en()}\n
-                =====Deutsch=====\n
-                {signoff_de()}\n
-                =====日本語=====\n
-                {signoff_jp()}
-            '''
-            # Debugging the message
-            print("Sending Message:", message)
-            intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
+                time.sleep(61)
+        
+    if (minute == 0) and (seconds == 30) and (hour == 21):
+        message = f'''
+            \t=====ភាសាខ្មែរ=====\n
+            {signoff_kh()}\n
+            =====English=====\n
+            {signoff_en()}\n
+            =====Deutsch=====\n
+            {signoff_de()}\n
+            =====日本語=====\n
+            {signoff_jp()}
+        '''
+        # Debugging the message
+        print("Sending Message:", message)
+        intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
 
     time.sleep(0.25)
     continue
+    # Template to send an image using the Telegram bot
+    # Uncomment and modify the following lines to send an image:
+
+    # with open("path_to_image.jpg", "rb") as image_file:
+    #     intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=image_file, caption="Optional caption for the image")
