@@ -173,7 +173,7 @@ It's currently 21:00 and it's time for me to sign off. I will see you again tomo
 def signoff_kh():
     return(
 f''' 
-បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មចុងថ្ងៃ។ ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ សុបិន្តល្អ។
+បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មថ្ងៃនេះ។ ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ សុបិន្តល្អ។
 ''')
 
 def signoff_jp():
@@ -192,6 +192,7 @@ Es ist jetzt 21:00 Uhr und Zeit für mich, mich für heute zu verabschieden. Ich
 
 
 def update_en(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
     verdict, advice = "", ""
     if 0 <= aqius <= 50:
         verdict = "good"
@@ -230,6 +231,7 @@ def update_en(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
 
 
 def update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
     verdict, advice = "", ""
     if 0 <= aqius <= 50:
         verdict = "ល្អ"
@@ -256,7 +258,7 @@ def update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ {change[0]} ពី {aqius_prior} ទៅ {aqius} ដែលជា {verdict}។ {advice}
+បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ {change[0]} ពី {aqius_prior} ទៅ {aqius} ដែលជា {verdict}។ {advice}
         '''
     else:
         return f'''
@@ -265,6 +267,7 @@ def update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
 
 
 def update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
     verdict, advice = "", ""
     if 0 <= aqius <= 50:
         verdict = "良い"
@@ -300,6 +303,7 @@ def update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
 
 
 def update_de(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
     verdict, advice = "", ""
     if 0 <= aqius <= 50:
         verdict = "gut"
@@ -376,16 +380,20 @@ while True:
     minute = int(current_time.strftime("%M"))
     hour = int(current_time.strftime("%H"))
     day = current_time.strftime("%A")
-    if (minute== 00) and (seconds == 0) and (hour==6):
-        aqius_prior=""
-        mainus_prior=""
+    month = current_time.strftime("%B")
+    date = int(current_time.strftime("%d"))
+    year = current_time.strftime("%Y")
+    if (minute ==0) and (seconds == 0) and (hour == 6):
+        aqius_prior = ""
+        mainus_prior = ""
         print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
 
-        aqius,mainus=get_phnom_penh_aq()
-        print(type(aqius))
+        aqius, mainus = get_phnom_penh_aq()
+
         message = f'''
-                    \t=====ភាសាខ្មែរ=====\n
+                    {date}/{month}/{year} {hour}:{minute}\n
+                    =====ភាសាខ្មែរ=====\n
                     {morning_message_kh(aqius, mainus)}\n
                     =====English=====\n
                     {morning_message_en(aqius, mainus)}\n
@@ -400,65 +408,63 @@ while True:
 
     # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
     if (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21):
-        change=None
+        change = None
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
-
-        aqius,mainus=get_phnom_penh_aq()
+        print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
+        aqius, mainus = get_phnom_penh_aq()
         print(aqius)
-        aqius_prior=aqius
-        mainus_prior=mainus
-
+        aqius_prior = aqius
+        mainus_prior = mainus
 
         def update():
             if abs(aqius - aqius_prior) <= 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
-                change = ["stagnant","samecat","samecat"]
+                change = ["stagnant", "samecat", "samecat"]
             elif aqius > aqius_prior + 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
-                change = ["deteriorating","samecat","samecat"]
+                change = ["deteriorating", "samecat", "samecat"]
             elif aqius < aqius_prior - 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
-                change = ["improving","samecat","samecat"]
+                change = ["improving", "samecat", "samecat"]
             elif get_aqi_category(aqius) != get_aqi_category(aqius_prior):
                 previous_category = get_aqi_category(aqius_prior)
                 current_category = get_aqi_category(aqius)
                 if aqius > aqius_prior:
-                    change = ["deteriorating",previous_category,current_category]
+                    change = ["deteriorating", previous_category, current_category]
                 elif aqius < aqius_prior:
-                    change = ["improving",previous_category,current_category]
+                    change = ["improving", previous_category, current_category]
 
-            message=f'''
-                \t=====ភាសាខ្មែរ=====\n
-                {update_kh(aqius,mainus,aqius_prior,mainus_prior,hour,minute,change)}\n
+            message = f'''
+            {date}/{month}/{year} {hour}:{minute}\n
+                =====ភាសាខ្មែរ=====\n
+                {update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
                 =====English=====\n
-                {update_en(aqius,mainus,aqius_prior,mainus_prior,hour,minute,change)}\n
+                {update_en(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
                 =====Deutsch=====\n
-                {update_de(aqius,mainus,aqius_prior,mainus_prior,hour,minute,change)}\n
+                {update_de(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
                 =====日本語=====\n
-                {update_jp(aqius,mainus,aqius_prior,mainus_prior,hour,minute,change)}
+                {update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}
 
             '''
             intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
 
-
-
-        if get_aqi_category(aqius)=="good":
+        if get_aqi_category(aqius) == "good":
             pass
-        elif get_aqi_category(aqius)=="moderate":
+        elif get_aqi_category(aqius) == "moderate":
             if (minute % 60 == 0) and (seconds == 0):
                 update()
                 time.sleep(60)
-        elif get_aqi_category(aqius)=="unhealthy for sensitive groups":
+        elif get_aqi_category(aqius) == "unhealthy for sensitive groups":
             if (minute % 30 == 0) and (seconds == 0):
                 update()
                 time.sleep(60)
-        elif get_aqi_category(aqius)=="unhealthy":
+        elif get_aqi_category(aqius) == "unhealthy":
             if (minute % 15 == 0) and (seconds == 0):
                 update()
                 time.sleep(60)
-        elif get_aqi_category(aqius)=="very unhealthy":
+        elif get_aqi_category(aqius) == "very unhealthy":
             if (minute % 10 == 0) and (seconds == 0):
                 update()
                 time.sleep(60)
-        elif get_aqi_category(aqius)=="hazardous":
-            if (minute % 5== 0) and (seconds == 0):
+        elif get_aqi_category(aqius) == "hazardous":
+            if (minute % 5 == 0) and (seconds == 0):
                 update()
                 time.sleep(60)
         elif (minute == 0) and (seconds == 30) and (hour == 21):
@@ -476,10 +482,5 @@ while True:
             print("Sending Message:", message)
             intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
 
-
-
-
-
     time.sleep(0.25)
     continue
-    
