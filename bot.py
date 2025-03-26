@@ -227,15 +227,15 @@ def update_en(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
     
     if (change[0] != 'stagnant') and (change[1] != "samecat"):
         return f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. **{advice}**
+Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. **{advice}**
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior}** to **{aqius}** which is **{verdict}**. **{advice}**
+Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior}** to **{aqius}** which is **{verdict}**. **{advice}**
         '''
     else:
         return f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{verdict}** with an AQI score of **{aqius}**. **{advice}**
+Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{verdict}** with an AQI score of **{aqius}**. **{advice}**
         '''
 
 
