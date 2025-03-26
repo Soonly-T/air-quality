@@ -84,7 +84,7 @@ def morning_message_en(aqius, mainus):
         advice = "Please provide a valid AQI value to receive air quality advice."
     return (
         f'''
-    Good morning, ladies and gentlemen. I hope you have had a restful sleep and eager to begin the new day. The air today is at a {aqius}, which means it's {verdict}. {advice}
+    Good morning, ladies and gentlemen. I hope you have had a restful sleep and eager to begin the new day. The air today is at a **{aqius}**, which means it's **{verdict}**. {advice}
 '''
     )
 
@@ -110,7 +110,7 @@ def morning_message_kh(aqius, mainus):
         advice = "ស្ថានភាពអាសន្ន! សូមនៅក្នុងផ្ទះ បិទបង្អួចនិងទ្វារឲ្យជិត​ និង សូមប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ។"
     return (
         f'''
-    អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ {aqius} ដែលមានន័យថា {verdict}។ {advice}
+    អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{verdict}**។ **{advice}**
 '''
     )
 
@@ -139,7 +139,7 @@ def morning_message_jp(aqius, mainus):
         advice = "有効なAQI値を入力してください。"
     return (
         f'''
-        おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は {aqius} で、「{verdict}」の状態です。{advice}
+        おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{verdict}」**の状態です。**{advice}**
     '''
     )
 
@@ -168,7 +168,7 @@ def morning_message_de(aqius, mainus):
         advice = "Bitte geben Sie einen gültigen AQI-Wert ein."
     return (
         f'''
-    Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie {verdict} ist. {advice}
+    Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{verdict}** ist. **{advice}**
 '''
     )
 
@@ -227,15 +227,15 @@ def update_en(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
     
     if (change[0] != 'stagnant') and (change[1] != "samecat"):
         return f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has {change[0]} from {aqius_prior} ({change[1]}) to {aqius} ({change[2]}). {advice}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. **{advice}**
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has {change[0]} from {aqius_prior} to {aqius} which is {verdict}. {advice}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior}** to **{aqius}** which is **{verdict}**. **{advice}**
         '''
     else:
         return f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still {verdict} with an AQI score of {aqius}. {advice}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{verdict}** with an AQI score of **{aqius}**. **{advice}**
         '''
 
 
@@ -263,15 +263,15 @@ def update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
     
     if (change[0] != 'stagnant') and (change[1] != "samecat"):
         return f'''
-បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ {change[0]} ពី {aqius_prior} ({change[1]}) ទៅ {aqius} ({change[2]})។ {advice}
+បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius}** ({change[2]})**។ **{advice}**
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ {change[0]} ពី {aqius_prior} ទៅ {aqius} ដែលជា {verdict}។ {advice}
+បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលជា **{verdict}**។ **{advice}**
         '''
     else:
         return f'''
-បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា {verdict} ដោយមានតម្លៃ AQI {aqius}។ {advice}
+បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{verdict}** ដោយមានតម្លៃ AQI **{aqius}**។ **{advice}**
         '''
 
 
@@ -299,15 +299,15 @@ def update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
     
     if (change[0] != 'stagnant') and (change[1] != "samecat"):
         return f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。{change[0]}で、{aqius_prior}（{change[1]}）から{aqius}（{change[2]}）に変わったんだ。{advice}
+    今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{change[0]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。**{advice}**
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態が{change[0]}で、{aqius_prior}から{aqius}に変わったよ。今の空気は「{verdict}」だね。{advice}
+    今の時間は{hour}時{minute}分だよ！空気の状態が**{change[0]}**で、**{aqius_prior}**から**{aqius}**に変わったよ。今の空気は**「{verdict}」**だね。**{advice}**
         '''
     else:
         return f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態は変わらず「{verdict}」のままだね。AQIスコアは{aqius}だよ。{advice}
+    今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{verdict}」**のままだね。AQIスコアは**{aqius}**だよ。**{advice}**
         '''
 
 
@@ -338,15 +338,15 @@ def update_de(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
 
     if (change[0] != 'stagnant') and (change[1] != "samecat"):
         return f'''
-Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist {change[0]} von {aqius_prior} ({change[1]}) zu {aqius} ({change[2]}) geworden. {advice}
+Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{change[0]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. **{advice}**
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich {change[0]} von {aqius_prior} auf {aqius} verändert. Die aktuelle Luftqualität ist „{verdict}“. {advice}
+Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{change[0]}** von **{aqius_prior}** auf **{aqius}** verändert. Die aktuelle Luftqualität ist **„{verdict}“**. **{advice}**
         '''
     else:
         return f'''
-Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt „{verdict}“. Der AQI-Wert liegt bei {aqius}. {advice}
+Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{verdict}“**. Der AQI-Wert liegt bei **{aqius}**. **{advice}**
         '''
 
 
@@ -419,7 +419,7 @@ while True:
 
         # Send the image with the text message
         with open(f"./labels/{image_file_name}", 'rb') as image_file:
-            intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=f"./labels/{image_file_name}", caption=message)
+            intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=f"./labels/{image_file_name}", caption=message,parse_mode="Markdown")
         time.sleep(60)
 
     # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
@@ -462,7 +462,7 @@ while True:
 
             '''
             with open(f"./labels/{image_file_name}", 'rb') as image_file:
-                intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=f"./labels/{image_file_name}", caption=message)
+                intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=f"./labels/{image_file_name}", caption=message,parse_mode="Markdown")
 
         if get_aqi_category(aqius) == "good":
             pass
