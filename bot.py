@@ -9,6 +9,15 @@ from textwrap import dedent
 API_KEY='''88e45ac1-6083-478d-bac0-6523f4bc4c76'''
 # Function to print the chat ID of the bot
 
+labels_dir='./labels'
+image_files = []
+
+# Loop through the files in the folder
+for file_name in os.listdir(labels_dir):
+    if file_name.endswith(".png"):  # Check if it's a PNG file
+        image_files.append(os.path.join(labels_dir, file_name))  # Add the full path to the list
+
+
 def get_phnom_penh_aq():
     phnom_penh_aq=(req.get(f"http://api.airvisual.com/v2/city?city=Phnom Penh&state=Phnom Penh&country=Cambodia&key={API_KEY}").json())
 
@@ -383,6 +392,8 @@ while True:
     month = current_time.strftime("%B")
     date = int(current_time.strftime("%d"))
     year = current_time.strftime("%Y")
+
+
     if (minute ==0) and (seconds == 0) and (hour == 6):
         print("Condition A is triggering the API call")
         aqius_prior = ""
@@ -391,7 +402,7 @@ while True:
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
 
         aqius, mainus = get_phnom_penh_aq()
-
+        image_file_name=get_aqi_category(aqius=aqius).replace(' ','_')+".png"
         message = f'''
                     {date}/{month}/{year} {hour}:{minute:02}\n
                     =====ភាសាខ្មែរ=====\n
@@ -404,7 +415,11 @@ while True:
                     {morning_message_jp(aqius, mainus)}
                 '''
 
-        intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
+        # image_path =   # Path to the image file
+
+        # Send the image with the text message
+        with open(f"./labels/{image_file_name}", 'rb') as image_file:
+            intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=f"./labels/{image_file_name}", caption=message)
         time.sleep(60)
 
     # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
@@ -414,6 +429,7 @@ while True:
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
         print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
         aqius, mainus = get_phnom_penh_aq()
+        image_file_name=get_aqi_category(aqius=aqius).replace(' ','_') +".png"
         print(aqius)
         aqius_prior = aqius
         mainus_prior = mainus
@@ -445,7 +461,8 @@ while True:
                 {update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}
 
             '''
-            intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
+            with open(f"./labels/{image_file_name}", 'rb') as image_file:
+                intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=f"./labels/{image_file_name}", caption=message)
 
         if get_aqi_category(aqius) == "good":
             pass
