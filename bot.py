@@ -84,7 +84,7 @@ def morning_message_en(aqius, mainus):
         advice = "Please provide a valid AQI value to receive air quality advice."
     return (
         f'''
-    Good morning, ladies and gentlemen. I hope you have had a restful sleep and eager to begin the new day. The air today is at a **{aqius}**, which means it's **{verdict}**. {advice}
+Good morning, ladies and gentlemen. I hope you have had a restful sleep and eager to begin the new day. The air today is at a **{aqius}**, which means it's **{verdict}**. {advice}
 '''
     )
 
@@ -110,7 +110,7 @@ def morning_message_kh(aqius, mainus):
         advice = "ស្ថានភាពអាសន្ន! សូមនៅក្នុងផ្ទះ បិទបង្អួចនិងទ្វារឲ្យជិត​ និង សូមប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ។"
     return (
         f'''
-    អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{verdict}**។ **{advice}**
+អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{verdict}**។ **{advice}**
 '''
     )
 
@@ -139,7 +139,7 @@ def morning_message_jp(aqius, mainus):
         advice = "有効なAQI値を入力してください。"
     return (
         f'''
-        おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{verdict}」**の状態です。**{advice}**
+おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{verdict}」**の状態です。**{advice}**
     '''
     )
 
@@ -168,7 +168,7 @@ def morning_message_de(aqius, mainus):
         advice = "Bitte geben Sie einen gültigen AQI-Wert ein."
     return (
         f'''
-    Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{verdict}** ist. **{advice}**
+Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{verdict}** ist. **{advice}**
 '''
     )
 
@@ -299,15 +299,15 @@ def update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
     
     if (change[0] != 'stagnant') and (change[1] != "samecat"):
         return f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{change[0]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。**{advice}**
+今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{change[0]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。**{advice}**
         '''
     elif (change[0] != 'stagnant'):
         return f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態が**{change[0]}**で、**{aqius_prior}**から**{aqius}**に変わったよ。今の空気は**「{verdict}」**だね。**{advice}**
+今の時間は{hour}時{minute}分だよ！空気の状態が**{change[0]}**で、**{aqius_prior}**から**{aqius}**に変わったよ。今の空気は**「{verdict}」**だね。**{advice}**
         '''
     else:
         return f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{verdict}」**のままだね。AQIスコアは**{aqius}**だよ。**{advice}**
+今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{verdict}」**のままだね。AQIスコアは**{aqius}**だよ。**{advice}**
         '''
 
 
