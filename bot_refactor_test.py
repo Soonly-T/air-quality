@@ -59,6 +59,34 @@ weekends = ["Friday", "Saturday", "Sunday"]
 intell1slt_bot = telebot.TeleBot(BOT_TOKEN)
 intell1slt_bot.send_message(chat_id=CHAT_ID, text="intell1slt_bot is now online.")
 
+class Message:
+
+    def __init__(self, chat_id, message):
+        self.chat_id = chat_id
+        self.message = message
+        self.aqius=""
+        self.mainus=""
+    
+    def get_aqi_category(aqius):
+    # Define AQI category ranges
+        if 0 <= aqius <= 50:
+            return "good"
+        elif 51 <= aqius <= 100:
+            return "moderate"
+        elif 101 <= aqius <= 150:
+            return "unhealthy for sensitive groups"
+        elif 151 <= aqius <= 200:
+            return "unhealthy"
+        elif 201 <= aqius <= 300:
+            return "very unhealthy"
+        elif aqius > 300:
+            return "hazardous"
+        else:
+            return "invalid"
+    
+    def morning_message()
+
+
 def morning_message_en(aqius, mainus):
     verdict, advice = "", ""
     if 0 <= aqius <= 50:
@@ -451,7 +479,7 @@ while True:
             # Continue execution even if an error occurs
 
     # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
-    elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour<= 21):  #
+    elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21):  #
         print("Condition B is triggering the API call")
         change = None
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
@@ -552,7 +580,7 @@ while True:
                 update()
                 time.sleep(65)
         time.sleep(65)
-    if (minute == 0) and (seconds == 30) and (hour == 21):
+    if (minute == 4) and (seconds == 30) and (hour == 21):
         message = f'''
         {date}/{month}/{year} {hour}:{minute:02}\n
             =====ភាសាខ្មែរ=====\n
