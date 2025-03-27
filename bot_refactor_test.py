@@ -6,41 +6,17 @@ import requests as req
 import json
 
 
-with open("./keys.json","r") as file:
-    keys=json.load(file)
 
-
-
-API_KEY=keys["iqair_api"]
-BOT_TOKEN = keys["bot_token"]
-CHAT_ID = keys["chat_id"]
 
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 weekends = ["Friday", "Saturday", "Sunday"]
 
-def intializeBot():
-    intell1slt_bot = telebot.TeleBot(BOT_TOKEN)
-    intell1slt_bot.send_message(chat_id=CHAT_ID, text="intell1slt_bot is now online.")
-    return intell1slt_bot
-
-
-def get_phnom_penh_aq():
-    phnom_penh_aq=(req.get(f"http://api.airvisual.com/v2/city?city=Phnom Penh&state=Phnom Penh&country=Cambodia&key={API_KEY}").json())
-
-    aqius=phnom_penh_aq["data"]["current"]["pollution"]["aqius"]
-    mainus=phnom_penh_aq["data"]["current"]["pollution"]["mainus"]
-    return aqius,mainus
 
 
 class Message:
-    def __init__(self, chat_id, message):
+    def __init__(self):
         self.change=""
-        self.chat_id = chat_id
-        self.message = message
-        self.aqius_prior=""
-        self.aqius_mainus=""
-        self.aqius=""
-        self.mainus=""
+
         self.verdict = {
         "good": {
             "en": "good",
@@ -54,7 +30,7 @@ class Message:
             "jp": "普通 (Moderate)",
             "de": "Mäßig (Moderate)"
         },
-        "unhealthy_for_sensitive_groups": {
+        "unhealthy for sensitive groups": {
             "en": "unhealthy for sensitive groups",
             "kh": "មិនល្អសម្រាប់ក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់",
             "jp": "敏感な人にとっては不健康 (Unhealthy for Sensitive Groups)",
@@ -130,8 +106,7 @@ class Message:
             }
         }
     
-    def get_aqi_category(aqius):
-
+    def get_aqi_category(self,aqius):
     # Define AQI category ranges
         if 0 <= aqius <= 50:
             return "good"
@@ -151,16 +126,16 @@ class Message:
     
     morning_message= lambda self,aqius,: ({
         "en":f'''
-🌅 Good morning, ladies and gentlemen. I hope you have had a restful sleep and are eager to begin the new day. The air today is at a **{aqius}**, which means it's **{self.verdict[get_aqi_category(aqius)]["en"]}**. {self.advice[get_aqi_category(aqius)]["en"]}
+🌅 Good morning, ladies and gentlemen. I hope you have had a restful sleep and are eager to begin the new day. The air today is at a **{aqius}**, which means it's **{self.verdict[self.get_aqi_category(aqius)]["en"]}**. {self.advice[self.get_aqi_category(aqius)]["en"]}
 ''',
         "kh":f'''
-🌅 អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{self.verdict[get_aqi_category(aqius)]["kh"]}**។ **{self.advice[get_aqi_category(aqius)]["kh"]}**
+🌅 អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{self.verdict[self.get_aqi_category(aqius)]["kh"]}**។ **{self.advice[self.get_aqi_category(aqius)]["kh"]}**
 ''',
 "jp":        f'''
-🌅 おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{self.verdict[get_aqi_category(aqius)]["jp"]}」**の状態です。**{self.advice[get_aqi_category(aqius)]["jp"]}**
+🌅 おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{self.verdict[self.get_aqi_category(aqius)]["jp"]}」**の状態です。**{self.advice[self.get_aqi_category(aqius)]["jp"]}**
     ''',
     "de":        f'''
-🌅 Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{self.verdict[get_aqi_category(aqius)]["de"]}** ist. **{self.advice[get_aqi_category(aqius)]["de"]}**
+🌅 Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{self.verdict[self.get_aqi_category(aqius)]["de"]}** ist. **{self.advice[self.get_aqi_category(aqius)]["de"]}**
 '''
     })
 
@@ -174,256 +149,134 @@ class Message:
     }
     )
 
-    def update(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+    def update(self, aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+        category=self.get_aqi_category(aqius)
+        mutate_state = "change" if change[0] != 'stagnant' and change[1] != "samecat" else "change_samecat" if change[0] != 'stagnant' else "samecat"
+        minute= f"{int(minute):02}"  # Ensure minute is always 2 digits
+        messages = {
+            "samecat": {
+            "en": f'''
+    Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{self.verdict[category]["en"]}** with an AQI score of **{aqius}**. {self.advice[category]["en"]}
+            ''',
+            "kh": f'''
+    បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{self.verdict[category]["kh"]}** ដោយមានតម្លៃ AQI **{aqius}**។ {self.advice[category]["kh"]}
+            ''',
+            "jp": f'''
+    今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{self.verdict[category]["jp"]}」**のままだね。AQIスコアは**{aqius}**だよ。{self.advice[category]["jp"]}
+            ''',
+            "de": f'''
+    Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{self.verdict[category]["de"]}“**. Der AQI-Wert liegt bei **{aqius}**. {self.advice[category]["de"]}
+            '''
+            },
+            "change_samecat": {
+            "en": f'''
+    Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior}** to **{aqius}**, which is still **{self.verdict[category]["en"]}**. {self.advice[category]["en"]}
+            ''',
+            "kh": f'''
+    បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលនៅតែជា **{self.verdict[category]["kh"]}**។ {self.advice[category]["kh"]}
+            ''',
+            "jp": f'''
+    今の時間は{hour}時{minute}分だよ！空気の状態が**{change[0]}**で、**{aqius_prior}**から**{aqius}**に変わったけど、まだ**「{self.verdict[category]["jp"]}」**だね。{self.advice[category]["jp"]}
+            ''',
+            "de": f'''
+    Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{change[0]}** von **{aqius_prior}** auf **{aqius}** verändert, bleibt aber **„{self.verdict[category]["de"]}“**. {self.advice[category]["de"]}
+            '''
+            },
+            "change": {
+            "en": f'''
+    Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. {self.advice[category]["en"]}
+            ''',
+            "kh": f'''
+    បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius} ({change[2]})**។ {self.advice[category]["kh"]}
+            ''',
+            "jp": f'''
+    今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{change[0]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。{self.advice[category]["jp"]}
+            ''',
+            "de": f'''
+    Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{change[0]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. {self.advice[category]["de"]}
+            '''
+            }
+        }
+
+        update={
+            "en":messages[mutate_state]["en"],
+            "kh":messages[mutate_state]["kh"],
+            "jp":messages[mutate_state]["jp"],
+            "de":messages[mutate_state]["de"]
+        }
+        return update
+    
+
+class Main:
+
+    def __init__(self):
+        with open("./keys.json","r") as file:
+            keys=json.load(file)
+
+        self.API_KEY=keys["iqair_api"]
+        self.BOT_TOKEN = keys["bot_token"]
+        self.CHAT_ID = keys["chat_id"]
+        self.message = ""
+        self.aqius=0
+        self.mainus=""
+        self.aqius_prior=0
+        self.mainus_prior=""
+        self.intell1slt_bot=self.initializeBot()
+        self.msg=Message()
+        self.change = None
+        self.category=""
+        # self.intell1slt_bot.send_message(chat_id=self.CHAT_ID, text="This is a test message from intell1slt bot!")
+
         
-
-        pass
+    def initializeBot(self):
+        intell1slt_bot = telebot.TeleBot(self.BOT_TOKEN)
+        try:
+            # Send a startup message
+            intell1slt_bot.send_message(chat_id=self.CHAT_ID, text="intell1slt_bot is now online.")
+            print("Test message sent!")
+        except telebot.apihelper.ApiTelegramException as e:
+            print(f"Failed to send a message: {e}")
+        return intell1slt_bot
     
-
-
-
-
-def update_en(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
-    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "good"
-        advice = "🌞 Go outside, breathe some of that fresh air and enjoy this wonderful day."
-    elif 51 <= aqius <= 100:
-        verdict = "moderate"
-        advice = "😷 It's fine to go outside but make sure to keep updated with us for the latest air quality news. Also, while not necessary, wear or bring a mask just in case."
-    elif 101 <= aqius <= 150:
-        verdict = "unhealthy for sensitive groups"
-        advice = "⚠️ If you're part of a sensitive group, such as children, the elderly, or those with respiratory issues, minimize prolonged outdoor activities and consider wearing a mask if necessary."
-    elif 151 <= aqius <= 200:
-        verdict = "unhealthy"
-        advice = "🚫 Limit outdoor activities to a minimum. Stay indoors as much as possible, and use air purifiers if available. Everyone, not just sensitive groups, should take precautions."
-    elif 201 <= aqius <= 300:
-        verdict = "very unhealthy"
-        advice = "❗ The air quality poses a serious health risk to everyone. Avoid going outdoors unless absolutely necessary, and wear a high-quality mask if you need to step outside. Follow health advisories closely."
-    elif aqius > 300:
-        verdict = "hazardous"
-        advice = "🚨 Emergency conditions! Stay indoors with windows and doors shut. Avoid physical exertion, and follow any official instructions. If available, use air purifiers to improve indoor air quality."
-    else:
-        verdict = "invalid AQI value"
-        advice = "❓ Please provide a valid AQI value to receive air quality advice."
+    def get_phnom_penh_aq(self):
+        for attempt in range(5):  # Retry up to 5 times
+            try:
+                phnom_penh_aq = req.get(f"http://api.airvisual.com/v2/city?city=Phnom Penh&state=Phnom Penh&country=Cambodia&key={self.API_KEY}").json()
+                aqius = phnom_penh_aq["data"]["current"]["pollution"]["aqius"]
+                mainus = phnom_penh_aq["data"]["current"]["pollution"]["mainus"]
+                return aqius, mainus
+            except Exception as e:
+                print(f"Attempt {attempt + 1} failed: {e}")
+                time.sleep(2)  # Wait before retrying
+        return "Error", "Error"  # Return "Error" if all attempts fail
     
-    if (change[0] != 'stagnant') and (change[1] != "samecat"):
-        return f'''
-Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. {advice}
-        '''
-    elif (change[0] != 'stagnant'):
-        return f'''
-Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior}** to **{aqius}** which is **{verdict}**. {advice}
-        '''
-    else:
-        return f'''
-Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{verdict}** with an AQI score of **{aqius}**. {advice}
-        '''
-
-
-def update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
-    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "ល្អ"
-        advice = "🌞 ចេញក្រៅដោយមិនមានការព្រួយបារម្ភ រីករាយជាមួយខ្យល់បរិសុទ្ធ ហើយរីករាយជាមួយថ្ងៃដ៏អស្ចារ្យនេះ។"
-    elif 51 <= aqius <= 100:
-        verdict = "មធ្យម"
-        advice = "😷 អាចចេញក្រៅបាន ប៉ុន្តែសូមតាមដានព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់ពីយើង។ អ្នកក៏អាចពាក់ ឬយកម៉ាស់តាមផង ដើម្បីការពារសុខភាព។"
-    elif 101 <= aqius <= 150:
-        verdict = "មិនល្អសម្រាប់ក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់"
-        advice = "⚠️ ប្រសិនបើអ្នកជាក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់ ដូចជា កុមារ អ្នកចាស់ ឬអ្នកមានបញ្ហាសុខភាពផ្នែកផ្លូវដង្ហើម សូមកំុការចេញក្រៅច្រើន។ គិតពី​ការពាក់ម៉ាស់ផងប្រសិនបើចាំបាច់។"
-    elif 151 <= aqius <= 200:
-        verdict = "មិនល្អ"
-        advice = "🚫 កាត់បន្ថយសកម្មភាពខាងក្រៅ​ គួរប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ មនុស្សគ្រប់ក្រុមគួរមានការប្រុងប្រយ័ត្ន។"
-    elif 201 <= aqius <= 300:
-        verdict = "អាក្រក់ខ្លាំង"
-        advice = "❗ គុណភាពខ្យល់ផ្តល់នូវហានិភ័យដល់សុខភាពសម្រាប់អ្នកគ្រប់គ្នា កុំចេញក្រៅលើកលែងតែមានភាពចាំបាច់ ហើយគួរពាក់ម៉ាស់ដែលមានគុណភាពខ្ពស់។"
-    elif aqius > 300:
-        verdict = "គ្រាអាសន្ន"
-        advice = "🚨 ស្ថានភាពអាសន្ន! សូមនៅក្នុងផ្ទះ បិទបង្អួចនិងទ្វារឲ្យជិត​ និង សូមប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ។"
+    def get_aqi_category(self,aqius):
+        return self.msg.get_aqi_category(aqius)
     
-    if (change[0] != 'stagnant') and (change[1] != "samecat"):
-        return f'''
-បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius}** ({change[2]})**។ {advice}
-        '''
-    elif (change[0] != 'stagnant'):
-        return f'''
-បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលជា **{verdict}**។ {advice}
-        '''
-    else:
-        return f'''
-បច្ចុប្បន្ន វាជាម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{verdict}** ដោយមានតម្លៃ AQI **{aqius}**។ {advice}
-        '''
-
-
-def update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
-    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "良い"
-        advice = "🌞 外に出て、新鮮な空気を吸って、この素晴らしい日を楽しみましょう。"
-    elif 51 <= aqius <= 100:
-        verdict = "普通"
-        advice = "😷 外に出ても問題ありませんが、最新の空気質情報をチェックするのを忘れないでください。必要に応じてマスクを持参してください。"
-    elif 101 <= aqius <= 150:
-        verdict = "敏感な人にとって不健康"
-        advice = "⚠️ 子供や高齢者、または呼吸器の問題を抱えている人は、長時間の屋外活動を控え、必要であればマスクを着用してください。"
-    elif 151 <= aqius <= 200:
-        verdict = "不健康"
-        advice = "🚫 屋外での活動を最小限に抑え、可能であれば室内にいるようにしてください。空気清浄機を利用するとよいでしょう。"
-    elif 201 <= aqius <= 300:
-        verdict = "非常に不健康"
-        advice = "❗ 空気質は健康に深刻な影響を及ぼします。外出する際は、高品質のマスクを着用し、健康アドバイスに従ってください。"
-    elif aqius > 300:
-        verdict = "危険"
-        advice = "🚨 緊急事態です！窓やドアを閉め切り、屋内にとどまってください。空気清浄機を使用することをお勧めします。"
+    def get_image(self,aqius):
+        image_file_name=self.get_aqi_category(aqius).replace(' ','_')+".png"
+        return image_file_name
     
-    if (change[0] != 'stagnant') and (change[1] != "samecat"):
-        return f'''
-今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{change[0]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。{advice}
-        '''
-    elif (change[0] != 'stagnant'):
-        return f'''
-今の時間は{hour}時{minute}分だよ！空気の状態が**{change[0]}**で、**{aqius_prior}**から**{aqius}**に変わったよ。今の空気は**「{verdict}」**だね。{advice}
-        '''
-    else:
-        return f'''
-今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{verdict}」**のままだね。AQIスコアは**{aqius}**だよ。{advice}
-        '''
-
-
-def update_de(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
-    minute = f"{int(minute):02}"  # Ensure minute is always 2 digits
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "gut"
-        advice = "🌞 Geh ruhig nach draußen, atme die frische Luft ein und genieße diesen wunderbaren Tag!"
-    elif 51 <= aqius <= 100:
-        verdict = "moderat"
-        advice = "😷 Es ist okay, nach draußen zu gehen, aber halte die aktuellen Luftqualitätsupdates im Blick. Sicher ist sicher, nimm eine Maske mit!"
-    elif 101 <= aqius <= 150:
-        verdict = "ungesund für empfindliche Gruppen"
-        advice = "⚠️ Wenn du zu einer empfindlichen Gruppe gehörst – Kinder, ältere Menschen oder Menschen mit Atemproblemen – solltest du lange Aktivitäten im Freien vermeiden. Trag eine Maske, wenn nötig."
-    elif 151 <= aqius <= 200:
-        verdict = "ungesund"
-        advice = "🚫 Beschränke Aktivitäten im Freien auf ein Minimum. Bleib möglichst drinnen und benutze einen Luftreiniger, wenn du einen hast."
-    elif 201 <= aqius <= 300:
-        verdict = "sehr ungesund"
-        advice = "❗ Die Luftqualität ist ein ernsthaftes Gesundheitsrisiko. Gehe nur raus, wenn es absolut notwendig ist, und trag dabei eine hochwertige Maske. Achte auf Gesundheitsanweisungen."
-    elif aqius > 300:
-        verdict = "gefährlich"
-        advice = "🚨 Notfall! Bleib drinnen, halte Fenster und Türen geschlossen und vermeide körperliche Anstrengungen. Nutze, falls vorhanden, einen Luftreiniger."
-    else:
-        verdict = "ungültiger AQI-Wert"
-        advice = "❓ Bitte gib einen gültigen AQI-Wert ein, um Ratschläge zur Luftqualität zu erhalten."
-
-    if (change[0] != 'stagnant') and (change[1] != "samecat"):
-        return f'''
-Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{change[0]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. {advice}
-        '''
-    elif (change[0] != 'stagnant'):
-        return f'''
-Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{change[0]}** von **{aqius_prior}** auf **{aqius}** verändert. Die aktuelle Luftqualität ist **„{verdict}“**. {advice}
-        '''
-    else:
-        return f'''
-Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{verdict}“**. Der AQI-Wert liegt bei **{aqius}**. {advice}
-        '''
-
-
-
-
-
-# intell1slt_bot.send_message(chat_id=CHAT_ID, text="This is a test message from intell1slt bot!")
-print("Test message sent!")
-
-intell1slt_bot=intializeBot()
-
-message=""
-time_stamp_1=None
-aqius_prior=""
-mainus_prior=""
-# Main loop to check time and call API
-
-
-def get_aqi_category(aqius):
-    # Define AQI category ranges
-    if 0 <= aqius <= 50:
-        return "good"
-    elif 51 <= aqius <= 100:
-        return "moderate"
-    elif 101 <= aqius <= 150:
-        return "unhealthy for sensitive groups"
-    elif 151 <= aqius <= 200:
-        return "unhealthy"
-    elif 201 <= aqius <= 300:
-        return "very unhealthy"
-    elif aqius > 300:
-        return "hazardous"
-    else:
-        return "invalid"
-
-while True:
-    # Fetch the current time and extract components
-    current_time = datetime.datetime.now()
-    seconds = int(current_time.strftime("%S"))
-    minute = int(current_time.strftime("%M"))
-    hour = int(current_time.strftime("%H"))
-    day = current_time.strftime("%A")
-    month = current_time.strftime("%B")
-    date = int(current_time.strftime("%d"))
-    year = current_time.strftime("%Y")
-
-
-    if (minute ==0) and (seconds == 0) and (hour == 6):
-        print("Condition A is triggering the API call")
-        aqius_prior = ""
-        mainus_prior = ""
-        print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
-        time_stamp_1 = current_time.replace(second=0, microsecond=0)
-
-        aqius, mainus = get_phnom_penh_aq()
-        image_file_name=get_aqi_category(aqius=aqius).replace(' ','_')+".png"
-        print(image_file_name)
-        morning_message=Message.morning_message(aqius)
-        message = f'''
-                    {date}/{month}/{year} {hour}:{minute:02}\n
-                    =====ភាសាខ្មែរ=====\n
-                    {morning_message["kh"]}\n
-                    =====English=====\n
-                    {morning_message["en"]}\n
-                    =====Deutsch=====\n
-                    {morning_message["de"]}\n
-                    =====日本語=====\n
-                    {morning_message["jp"]}
-                '''
-
-        # image_path =   # Path to the image file
-
-        # Send the image with the text message
+    def send_message(self,image_file_name,message):
         try:
             for attempt in range(4):  # Retry up to 4 times
                 try:
                     with open(f"./labels/{image_file_name}", 'rb') as image_file:
-                        intell1slt_bot.send_photo(
-                            chat_id=CHAT_ID,
-                            photo=image_file,  # Photo binary
-                            caption=None      # No caption for the photo
+                        self.intell1slt_bot.send_photo(
+                            chat_id=self.CHAT_ID,
+                            photo=image_file,  
+                            caption=None      
                         )
                     print("Image sent")
-                    # Wait for 1 second to ensure the image loads first
                     time.sleep(1)
 
-                    # Send the message after the photo
-                    intell1slt_bot.send_message(
-                        chat_id=CHAT_ID,
-                        text=message,           # Your text message
-                        parse_mode="Markdown"  # Optional: Specify Markdown or HTML if needed
+                    self.intell1slt_bot.send_message(
+                        chat_id=self.CHAT_ID,
+                        text=message,           
+                        parse_mode="Markdown"  
                     )
                     print("Text sent")
-                    break  # Exit the loop if successful
+                    break  
                 except Exception as e:
                     print(f"Attempt {attempt + 1} failed: {e}")
                     if attempt == 3:  # If it's the last attempt, raise the exception
@@ -432,131 +285,148 @@ while True:
             time.sleep(65)
         except Exception as e:
             print(f"An error occurred: {e}")
-            # Continue execution even if an error occurs
 
-    # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
-    elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21):  #
-        print("Condition B is triggering the API call")
-        change = None
-        time_stamp_1 = current_time.replace(second=0, microsecond=0)
-        print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
-        aqius, mainus = get_phnom_penh_aq()
-        image_file_name=get_aqi_category(aqius=aqius).replace(' ','_') +".png"
-        print(aqius)
-        aqius_prior = aqius
-        mainus_prior = mainus
+    def send_message(self,message):
+        try:
+            for attempt in range(4):  # Retry up to 4 times
+                try:
+                    self.intell1slt_bot.send_message(
+                        chat_id=self.CHAT_ID,
+                        text=message,           
+                        parse_mode="Markdown"  
+                    )
+                    print("Text sent")
+                    break  
+                except Exception as e:
+                    print(f"Attempt {attempt + 1} failed: {e}")
+                    if attempt == 3:  # If it's the last attempt, raise the exception
+                        raise
+                    time.sleep(2)  # Wait before retrying
+            time.sleep(65)
+        except Exception as e:
+            print(f"An error occurred: {e}")
 
-        def update():
-            print("update() called")
-            if abs(aqius - aqius_prior) <= 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
-                change = ["stagnant", "samecat", "samecat"]
-            elif aqius > aqius_prior + 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
-                change = ["deteriorating", "samecat", "samecat"]
-            elif aqius < aqius_prior - 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
-                change = ["improving", "samecat", "samecat"]
-            elif get_aqi_category(aqius) != get_aqi_category(aqius_prior):
-                previous_category = get_aqi_category(aqius_prior)
-                current_category = get_aqi_category(aqius)
-                if aqius > aqius_prior:
-                    change = ["deteriorating", previous_category, current_category]
-                elif aqius < aqius_prior:
-                    change = ["improving", previous_category, current_category]
+    def update(self,date,month,year,hour,minute):
 
-            message = f'''
-            {date}/{month}/{year} {hour}:{minute:02}\n
-                =====ភាសាខ្មែរ=====\n
-                {update_kh(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
-                =====English=====\n
-                {update_en(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
-                =====Deutsch=====\n
-                {update_de(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}\n
-                =====日本語=====\n
-                {update_jp(aqius, mainus, aqius_prior, mainus_prior, hour, f"{minute:02}", change)}
+        print("update() called")
+        if abs(self.aqius - self.aqius_prior) <= 5 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
+            self.change = ["stagnant", "samecat", "samecat"]
+        elif self.aqius > self.aqius_prior + 5 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
+            self.change = ["deteriorating", "samecat", "samecat"]
+        elif self.aqius < self.aqius_prior - 5 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
+            self.change = ["improving", "samecat", "samecat"]
+        elif self.get_aqi_category(self.aqius) != self.get_aqi_category(self.aqius_prior):
+            previous_category = self.get_aqi_category(self.aqius_prior)
+            current_category = self.get_aqi_category(self.aqius)
+            if self.aqius > self.aqius_prior:
+                self.change = ["deteriorating", previous_category, current_category]
+            elif self.aqius < self.aqius_prior:
+                self.change = ["improving", previous_category, current_category]
 
-            '''
-            try:
-                for attempt in range(4):  # Retry up to 4 times
-                    try:
-                        with open(f"./labels/{image_file_name}", 'rb') as image_file:
-                            intell1slt_bot.send_photo(
-                                chat_id=CHAT_ID,
-                                photo=image_file,  # Photo binary
-                                caption=None  # No caption for the photo
-                            )
-                        print("Image sent")
-                        # Wait for 1 second to ensure the image loads first
-                        time.sleep(1)
-
-                        # Send the message after the photo
-                        intell1slt_bot.send_message(
-                            chat_id=CHAT_ID,
-                            text=message,           # Your text message
-                            parse_mode="Markdown"  # Optional: Specify Markdown or HTML if needed
-                        )
-                        print("Text sent")
-                        break  # Exit the loop if successful
-                    except Exception as e:
-                        print(f"Attempt {attempt + 1} failed: {e}")
-                        if attempt == 3:  # If it's the last attempt, raise the exception
-                            raise
-                        time.sleep(2)  # Wait before retrying
-                print("Text Sent")
-                time.sleep(65)
-            except FileNotFoundError as e:
-                print(f"File not found: {e}")
-            except telebot.apihelper.ApiException as e:
-                print(f"Telegram API error: {e}")
-            except Exception as e:
-                print(f"Unexpected error: {e}")
-        
-
-        
-
-
-        if get_aqi_category(aqius) == "good":
-            pass
-        elif get_aqi_category(aqius) == "moderate":
-            if (minute % 60 == 0) and (seconds == 0):
-                update()
-                time.sleep(65)
-        elif get_aqi_category(aqius) == "unhealthy for sensitive groups":
-            if (minute % 30 == 0) and (seconds == 0):
-                update()
-                time.sleep(65)
-        elif get_aqi_category(aqius) == "unhealthy":
-            if (minute % 15 == 0) and (seconds == 0):
-                update()
-                time.sleep(65)
-        elif get_aqi_category(aqius) == "very unhealthy":
-            if (minute % 10 == 0) and (seconds == 0):
-                update()
-                time.sleep(65)
-        elif get_aqi_category(aqius) == "hazardous":
-            if (minute % 5 == 0) and (seconds == 0):
-                update()
-                time.sleep(65)
-        time.sleep(65)
-    if (minute == 4) and (seconds == 30) and (hour == 21):
         message = f'''
         {date}/{month}/{year} {hour}:{minute:02}\n
             =====ភាសាខ្មែរ=====\n
-            {signoff_kh()}\n
+            {self.msg.update(self.aqius, self.mainus, self.aqius_prior, self.mainus_prior, hour, f"{minute:02}", self.change)["kh"]}\n
             =====English=====\n
-            {signoff_en()}\n
+            {self.msg.update(self.aqius, self.mainus, self.aqius_prior, self.mainus_prior, hour, f"{minute:02}", self.change)["en"]}\n
             =====Deutsch=====\n
-            {signoff_de()}\n
+            {self.msg.update(self.aqius, self.mainus, self.aqius_prior, self.mainus_prior, hour, f"{minute:02}", self.change)["de"]}\n
             =====日本語=====\n
-            {signoff_jp()}
+            {self.msg.update(self.aqius, self.mainus, self.aqius_prior, self.mainus_prior, hour, f"{minute:02}", self.change)["jp"]}
+
         '''
-        # Debugging the message
+        return message
+    def main(self):
+        while True:
+            # Fetch the current time and extract components
+            current_time = datetime.datetime.now()
+            seconds = int(current_time.strftime("%S"))
+            minute = int(current_time.strftime("%M"))
+            hour = int(current_time.strftime("%H"))
+            day = current_time.strftime("%A")
+            month = current_time.strftime("%B")
+            date = int(current_time.strftime("%d"))
+            year = current_time.strftime("%Y")
 
-        intell1slt_bot.send_message(chat_id=CHAT_ID, text=message)
-        time.sleep(65)
+            if (minute ==0) and (seconds == 0) and (hour == 6):
+                self.category=self.get_aqi_category(self.aqius)
+                print("Condition A is triggering the API call")
+                print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
+                self.aqius, self.mainus = self.get_phnom_penh_aq()
+                image_file_name = self.get_image(self.aqius)
+                morning_message=self.msg.morning_message(self.aqius)
+                message = f'''
+                            {date}/{month}/{year} {hour}:{minute:02}\n
+                            =====ភាសាខ្មែរ=====\n
+                            {morning_message["kh"]}\n
+                            =====English=====\n
+                            {morning_message["en"]}\n
+                            =====Deutsch=====\n
+                            {morning_message["de"]}\n
+                            =====日本語=====\n
+                            {morning_message["jp"]}
+                        '''
+                self.send_message(image_file_name,message)
+            elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour): #<= 21
+                self.category=self.get_aqi_category(self.aqius)
+                print("Condition B is triggering the API call")
+                print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
+                self.aqius, self.mainus = self.get_phnom_penh_aq()
+                image_file_name = self.get_image(self.aqius)
+                self.change=None
+                
+                if self.aqius_prior==0:
+                    self.aqius_prior = self.aqius
+                    self.mainus_prior = self.mainus
+                message= self.update(date,month,year,hour,minute)
 
-    time.sleep(0.25)
-    continue
-    # Template to send an image using the Telegram bot
-    # Uncomment and modify the following lines to send an image:
+                if self.category == "good":
+                    pass
+                elif self.category == "moderate":
+                    if (minute % 60 == 0) and (seconds == 0):
+                        self.send_message(image_file_name,message)
 
-    # with open("path_to_image.jpg", "rb") as image_file:
-    #     intell1slt_bot.send_photo(chat_id=CHAT_ID, photo=image_file, caption="Optional caption for the image")
+                elif self.category == "unhealthy for sensitive groups":
+                    if (minute % 30 == 0) and (seconds == 0):
+                        self.send_message(image_file_name,message)
+
+                elif self.category == "unhealthy":
+                    if (minute % 15 == 0) and (seconds == 0):
+                        self.send_message(image_file_name,message)
+
+                elif self.category == "very unhealthy":
+                    if (minute % 10 == 0) and (seconds == 0):
+                        self.send_message(image_file_name,message)
+
+                elif self.category == "hazardous":
+                    if (minute % 5 == 0) and (seconds == 0):
+                        self.send_message(image_file_name,message)
+
+                time.sleep(65)
+                print(f"Current AQI: {self.aqius}, Prior AQI: {self.aqius_prior}")
+                self.aqius_prior = self.aqius
+                self.mainus_prior = self.mainus
+            if (minute == 4) and (seconds == 30) and (hour == 21):
+                print("Condition C is triggering the API call")
+                print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
+
+                message = f'''
+                {date}/{month}/{year} {hour}:{minute:02}\n
+                    =====ភាសាខ្មែរ=====\n
+                    {self.msg.signoff["kh"]}\n
+                    =====English=====\n
+                    {self.msg.signoff["en"]}\n
+                    =====Deutsch=====\n
+                    {self.msg.signoff["de"]}\n
+                    =====日本語=====\n
+                    {self.msg.signoff["jp"]}
+                '''
+                self.send_message(image_file_name,message)
+            time.sleep(0.1)
+
+
+if __name__ == "__main__":
+
+    air_quality_bot = Main()
+
+    air_quality_bot.main()

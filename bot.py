@@ -8,7 +8,7 @@ from textwrap import dedent
 
 API_KEY='''88e45ac1-6083-478d-bac0-6523f4bc4c76'''
 # Function to print the chat ID of the bot
-
+aqius_prior = 0
 labels_dir='./labels'
 image_files = []
 
@@ -396,7 +396,7 @@ while True:
 
     if (minute ==0) and (seconds == 0) and (hour == 6):
         print("Condition A is triggering the API call")
-        aqius_prior = ""
+        aqius_prior = 0
         mainus_prior = ""
         print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
@@ -451,7 +451,8 @@ while True:
             # Continue execution even if an error occurs
 
     # Check if it's time to call the API (every 5 minutes at XX:00 seconds)
-    elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour<= 21):  #
+    elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21):  #
+        print((6 <= hour <= 21))
         print("Condition B is triggering the API call")
         change = None
         time_stamp_1 = current_time.replace(second=0, microsecond=0)
@@ -459,12 +460,17 @@ while True:
         aqius, mainus = get_phnom_penh_aq()
         image_file_name=get_aqi_category(aqius=aqius).replace(' ','_') +".png"
         print(aqius)
+        if aqius_prior==0:
+            aqius_prior = aqius
+            mainus_prior = mainus
 
 
 
         def update():
             print("update() called")
-            print(f"Current AQI: {aqius}, Prior AQI: {aqius_prior}")
+            if aqius_prior == 0:
+                aqius_prior = aqius
+                mainus_prior = mainus
 
    
 
@@ -528,8 +534,10 @@ while True:
                 print(f"Telegram API error: {e}")
             except Exception as e:
                 print(f"Unexpected error: {e}")
+            print(f"Current AQI: {aqius}, Prior AQI: {aqius_prior}")
             aqius_prior = aqius
             mainus_prior = mainus
+            
 
         
 
