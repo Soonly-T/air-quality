@@ -286,7 +286,7 @@ class Main:
         except Exception as e:
             print(f"An error occurred: {e}")
 
-    def send_message(self,message):
+    def send_only_message(self,message):
         try:
             for attempt in range(4):  # Retry up to 4 times
                 try:
@@ -309,11 +309,11 @@ class Main:
     def update(self,date,month,year,hour,minute):
 
         print("update() called")
-        if abs(self.aqius - self.aqius_prior) <= 5 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
+        if abs(self.aqius - self.aqius_prior) <= 2 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
             self.change = ["stagnant", "samecat", "samecat"]
-        elif self.aqius > self.aqius_prior + 5 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
+        elif self.aqius > self.aqius_prior + 2 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
             self.change = ["deteriorating", "samecat", "samecat"]
-        elif self.aqius < self.aqius_prior - 5 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
+        elif self.aqius < self.aqius_prior - 2 and self.get_aqi_category(self.aqius) == self.get_aqi_category(self.aqius_prior):
             self.change = ["improving", "samecat", "samecat"]
         elif self.get_aqi_category(self.aqius) != self.get_aqi_category(self.aqius_prior):
             previous_category = self.get_aqi_category(self.aqius_prior)
@@ -335,6 +335,8 @@ class Main:
             {self.msg.update(self.aqius, self.mainus, self.aqius_prior, self.mainus_prior, hour, f"{minute:02}", self.change)["jp"]}
 
         '''
+        self.aqius_prior = self.aqius
+        self.mainus_prior = self.mainus
         return message
     def main(self):
         while True:
@@ -367,7 +369,7 @@ class Main:
                             {morning_message["jp"]}
                         '''
                 self.send_message(image_file_name,message)
-            elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour): #<= 21
+            elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21): #
                 self.category=self.get_aqi_category(self.aqius)
                 print("Condition B is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -404,8 +406,7 @@ class Main:
 
                 time.sleep(65)
                 print(f"Current AQI: {self.aqius}, Prior AQI: {self.aqius_prior}")
-                self.aqius_prior = self.aqius
-                self.mainus_prior = self.mainus
+
             if (minute == 4) and (seconds == 30) and (hour == 21):
                 print("Condition C is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -421,7 +422,7 @@ class Main:
                     =====日本語=====\n
                     {self.msg.signoff["jp"]}
                 '''
-                self.send_message(image_file_name,message)
+                self.send_only_message(message)
             time.sleep(0.1)
 
 
