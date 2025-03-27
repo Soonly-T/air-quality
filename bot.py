@@ -464,10 +464,10 @@ while True:
 
         def update():
             print("update() called")
-            aqius_prior = aqius
-            mainus_prior = mainus
-   
             print(f"Current AQI: {aqius}, Prior AQI: {aqius_prior}")
+
+   
+
             if abs(aqius - aqius_prior) <= 2 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
                 change = ["stagnant", "samecat", "samecat"]
             elif aqius > aqius_prior + 2 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
@@ -528,7 +528,8 @@ while True:
                 print(f"Telegram API error: {e}")
             except Exception as e:
                 print(f"Unexpected error: {e}")
-        
+            aqius_prior = aqius
+            mainus_prior = mainus
 
         
 

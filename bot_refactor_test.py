@@ -131,6 +131,7 @@ class Message:
         }
     
     def get_aqi_category(aqius):
+
     # Define AQI category ranges
         if 0 <= aqius <= 50:
             return "good"
@@ -172,6 +173,11 @@ class Message:
     "de": " \n🌙 Es ist jetzt 21:00 Uhr und Zeit für mich, mich für heute zu verabschieden. 💤 Ich bin morgen ab 6 Uhr wieder da, um Ihnen weitere Updates zur Luftqualität zu geben. 🌍 Dies war intell1slt_bot, zu Ihren Diensten. 🌟 Gute Nacht! 🌌\n"
     }
     )
+
+    def update(aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
+        
+
+        pass
     
 
 
