@@ -459,13 +459,13 @@ while True:
         aqius, mainus = get_phnom_penh_aq()
         image_file_name=get_aqi_category(aqius=aqius).replace(' ','_') +".png"
         print(aqius)
-        aqius_prior = aqius
-        mainus_prior = mainus
+
 
 
         def update():
             print("update() called")
-
+            aqius_prior = aqius
+            mainus_prior = mainus
    
             print(f"Current AQI: {aqius}, Prior AQI: {aqius_prior}")
             if abs(aqius - aqius_prior) <= 2 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):

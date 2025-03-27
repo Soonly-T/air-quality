@@ -333,7 +333,7 @@ Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt
 # intell1slt_bot.send_message(chat_id=CHAT_ID, text="This is a test message from intell1slt bot!")
 print("Test message sent!")
 
-
+intell1slt_bot=intializeBot()
 
 message=""
 time_stamp_1=None
