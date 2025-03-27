@@ -462,13 +462,17 @@ while True:
         aqius_prior = aqius
         mainus_prior = mainus
 
+
         def update():
             print("update() called")
-            if abs(aqius - aqius_prior) <= 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
+
+   
+            print(f"Current AQI: {aqius}, Prior AQI: {aqius_prior}")
+            if abs(aqius - aqius_prior) <= 2 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
                 change = ["stagnant", "samecat", "samecat"]
-            elif aqius > aqius_prior + 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
+            elif aqius > aqius_prior + 2 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
                 change = ["deteriorating", "samecat", "samecat"]
-            elif aqius < aqius_prior - 5 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
+            elif aqius < aqius_prior - 2 and get_aqi_category(aqius) == get_aqi_category(aqius_prior):
                 change = ["improving", "samecat", "samecat"]
             elif get_aqi_category(aqius) != get_aqi_category(aqius_prior):
                 previous_category = get_aqi_category(aqius_prior)

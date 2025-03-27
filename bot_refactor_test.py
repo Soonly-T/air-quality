@@ -4,18 +4,24 @@ import datetime
 import time
 import requests as req
 import json
-from textwrap import dedent
 
-API_KEY='''88e45ac1-6083-478d-bac0-6523f4bc4c76'''
-# Function to print the chat ID of the bot
 
-labels_dir='./labels'
-image_files = []
+with open("./keys.json","r") as file:
+    keys=json.load(file)
 
-# Loop through the files in the folder
-for file_name in os.listdir(labels_dir):
-    if file_name.endswith(".png"):  # Check if it's a PNG file
-        image_files.append(os.path.join(labels_dir, file_name))  # Add the full path to the list
+
+
+API_KEY=keys["iqair_api"]
+BOT_TOKEN = keys["bot_token"]
+CHAT_ID = keys["chat_id"]
+
+weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday"]
+weekends = ["Friday", "Saturday", "Sunday"]
+
+def intializeBot():
+    intell1slt_bot = telebot.TeleBot(BOT_TOKEN)
+    intell1slt_bot.send_message(chat_id=CHAT_ID, text="intell1slt_bot is now online.")
+    return intell1slt_bot
 
 
 def get_phnom_penh_aq():
@@ -25,47 +31,104 @@ def get_phnom_penh_aq():
     mainus=phnom_penh_aq["data"]["current"]["pollution"]["mainus"]
     return aqius,mainus
 
-# Bot configuration
-BOT_TOKEN = "8020379908:AAE5oD5MS73BnjcMKd2wSQrj34drgbo6w4s"
-CHAT_ID = "-1002684296791"
-
-# # URL to get updates
-# url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
-
-# # Make the request to Telegram API
-# response = req.get(url)
-
-# # Parse the JSON response
-# if response.status_code == 200:  # Ensure the request was successful
-#     updates = response.json()
-#     print("Updates:", updates)
-    
-#     # Extract chat IDs from the updates
-#     if "result" in updates:
-#         for update in updates["result"]:
-#             if "message" in update:
-#                 chat_id = update["message"]["chat"]["id"]
-#                 chat_type = update["message"]["chat"]["type"]
-#                 chat_title = update["message"]["chat"].get("title", "Private Chat")
-#                 print(f"Chat ID: {chat_id}, Type: {chat_type}, Title: {chat_title}")
-# else:
-#     print(f"Failed to fetch updates. Error code: {response.status_code}")
-
-# Define weekdays and weekends
-weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday"]
-weekends = ["Friday", "Saturday", "Sunday"]
-
-# Initialize the bot
-intell1slt_bot = telebot.TeleBot(BOT_TOKEN)
-intell1slt_bot.send_message(chat_id=CHAT_ID, text="intell1slt_bot is now online.")
 
 class Message:
-
     def __init__(self, chat_id, message):
+        self.change=""
         self.chat_id = chat_id
         self.message = message
+        self.aqius_prior=""
+        self.aqius_mainus=""
         self.aqius=""
         self.mainus=""
+        self.verdict = {
+        "good": {
+            "en": "good",
+            "kh": "ល្អ",
+            "jp": "良い (Good)",
+            "de": "Gut (Good)"
+        },
+        "moderate": {
+            "en": "moderate",
+            "kh": "មធ្យម",
+            "jp": "普通 (Moderate)",
+            "de": "Mäßig (Moderate)"
+        },
+        "unhealthy_for_sensitive_groups": {
+            "en": "unhealthy for sensitive groups",
+            "kh": "មិនល្អសម្រាប់ក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់",
+            "jp": "敏感な人にとっては不健康 (Unhealthy for Sensitive Groups)",
+            "de": "Ungesund für empfindliche Gruppen (Unhealthy for Sensitive Groups)"
+        },
+        "unhealthy": {
+            "en": "unhealthy",
+            "kh": "មិនល្អ",
+            "jp": "不健康 (Unhealthy)",
+            "de": "Ungesund (Unhealthy)"
+        },
+        "very_unhealthy": {
+            "en": "very unhealthy",
+            "kh": "អាក្រក់ខ្លាំង",
+            "jp": "非常に不健康 (Very Unhealthy)",
+            "de": "Sehr ungesund (Very Unhealthy)"
+        },
+        "hazardous": {
+            "en": "hazardous",
+            "kh": "គ្រាអាសន្ន",
+            "jp": "危険 (Hazardous)",
+            "de": "Gefährlich (Hazardous)"
+        },
+        "invalid": {
+            "en": "invalid AQI value",
+            "kh": "តម្លៃ AQI មិនត្រឹមត្រូវ",
+            "jp": "無効なAQI値",
+            "de": "Ungültiger AQI-Wert"
+        }
+    }
+        self.advice = {
+            "good": {
+                "en": "🌞 Go outside, breathe some of that fresh air and enjoy this wonderful day.",
+                "kh": "🌞 ចេញក្រៅដោយមិនមានការព្រួយបារម្ភ រីករាយជាមួយខ្យល់បរិសុទ្ធ ហើយរីករាយជាមួយថ្ងៃដ៏អស្ចារ្យនេះ។",
+                "jp": "🌞 外に出て、新鮮な空気を吸い、この素晴らしい日を楽しみましょう！",
+                "de": "🌞 Gehen Sie nach draußen, atmen Sie die frische Luft ein und genießen Sie diesen wunderbaren Tag!"
+            },
+            "moderate": {
+                "en": "😷 It's fine to go outside but make sure to keep updated with us for the latest air quality news. Also, while not necessary, wear or bring a mask just in case.",
+                "kh": "😷 អាចចេញក្រៅបាន ប៉ុន្តែសូមតាមដានព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់ពីយើង។ អ្នកក៏អាចពាក់ ឬយកម៉ាស់តាមផង ដើម្បីការពារសុខភាព។",
+                "jp": "😷 外に出ても大丈夫ですが、最新の空気質情報をチェックするようにしてください。必要ではありませんが、念のためにマスクを持参または着用してください。",
+                "de": "😷 Es ist in Ordnung, nach draußen zu gehen, aber halten Sie sich über die neuesten Nachrichten zur Luftqualität auf dem Laufenden. Auch wenn es nicht unbedingt erforderlich ist, nehmen oder tragen Sie sicherheitshalber eine Maske."
+            },
+            "unhealthy for sensitive groups": {
+                "en": "⚠️ If you're part of a sensitive group, such as children, the elderly, or those with respiratory issues, minimize prolonged outdoor activities and consider wearing a mask if necessary.",
+                "kh": "⚠️ ប្រសិនបើអ្នកជាក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់ ដូចជា កុមារ អ្នកចាស់ ឬអ្នកមានបញ្ហាសុខភាពផ្នែកផ្លូវដង្ហើម សូមកំុការចេញក្រៅច្រើន។ គិតពី​ការពាក់ម៉ាស់ផងប្រសិនបើចាំបាច់។",
+                "jp": "⚠️ 子供、高齢者、または呼吸器系の問題を抱える敏感なグループに属している場合は、長時間の屋外活動を控え、必要に応じてマスクを着用してください。",
+                "de": "⚠️ Wenn Sie zu einer empfindlichen Gruppe gehören, wie z. B. Kinder, ältere Menschen oder Personen mit Atemwegsproblemen, sollten Sie längere Aufenthalte im Freien vermeiden und bei Bedarf eine Maske tragen."
+            },
+            "unhealthy": {
+                "en": "🚫 Limit outdoor activities to a minimum. Stay indoors as much as possible, and use air purifiers if available. Everyone, not just sensitive groups, should take precautions.",
+                "kh": "🚫 កាត់បន្ថយសកម្មភាពខាងក្រៅ​ គួរប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ មនុស្សគ្រប់ក្រុមគួរមានការប្រុងប្រយ័ត្ន។",
+                "jp": "🚫 屋外活動を最小限に抑え、可能であれば室内にいるようにしてください。また、空気清浄機を使用すると良いでしょう。全員が予防措置を講じる必要があります。",
+                "de": "🚫 Reduzieren Sie Aktivitäten im Freien auf ein Minimum. Bleiben Sie möglichst in Innenräumen und verwenden Sie, wenn verfügbar, Luftreiniger. Nicht nur empfindliche Gruppen sollten Vorsichtsmaßnahmen treffen, sondern alle."
+            },
+            "very unhealthy": {
+                "en": "❗ The air quality poses a serious health risk to everyone. Avoid going outdoors unless absolutely necessary, and wear a high-quality mask if you need to step outside. Follow health advisories closely.",
+                "kh": "❗ គុណភាពខ្យល់ផ្តល់នូវហានិភ័យដល់សុខភាពសម្រាប់អ្នកគ្រប់គ្នា កុំចេញក្រៅលើកលែងតែមានភាពចាំបាច់ ហើយគួរពាក់ម៉ាស់ដែលមានគុណភាពខ្ពស់។",
+                "jp": "❗ 空気質が健康に深刻なリスクをもたらします。絶対に必要でない限り外に出ないようにし、外出する場合は高性能のマスクを着用してください。公的な健康指導に従ってください。",
+                "de": "❗ Die Luftqualität stellt ein ernstes Gesundheitsrisiko für alle dar. Vermeiden Sie den Aufenthalt im Freien, es sei denn, es ist absolut notwendig. Tragen Sie eine hochwertige Maske, wenn Sie nach draußen gehen müssen. Folgen Sie den Gesundheitsempfehlungen."
+            },
+            "hazardous": {
+                "en": "🚨 Emergency conditions! Stay indoors with windows and doors shut. Avoid physical exertion, and follow any official instructions. If available, use air purifiers to improve indoor air quality.",
+                "kh": "🚨 ស្ថានភាពអាសន្ន! សូមនៅក្នុងផ្ទះ បិទបង្អួចនិងទ្វារឲ្យជិត​ និង សូមប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ។",
+                "jp": "🚨 非常事態です！屋内に留まり、窓とドアをしっかりと閉めてください。身体を動かさないようにし、公式の指示に従ってください。空気清浄機があれば使用してください。",
+                "de": "🚨 Notfallbedingungen! Bleiben Sie in Innenräumen und schließen Sie Fenster und Türen. Vermeiden Sie körperliche Anstrengung und folgen Sie offiziellen Anweisungen. Verwenden Sie, wenn möglich, Luftreiniger."
+            },
+            "invalid": {
+                "en": "❓ Please provide a valid AQI value to receive air quality advice.",
+                "kh": "❓ សូមផ្តល់ជូនតម្លៃ AQI ដែលត្រឹមត្រូវ ដើម្បីទទួលបានដំបូន្មានគុណភាពខ្យល់។",
+                "jp": "❓ 有効なAQI値を入力してください。",
+                "de": "❓ Bitte geben Sie einen gültigen AQI-Wert ein."
+            }
+        }
     
     def get_aqi_category(aqius):
     # Define AQI category ranges
@@ -83,147 +146,33 @@ class Message:
             return "hazardous"
         else:
             return "invalid"
+
     
-    def morning_message()
-
-
-def morning_message_en(aqius, mainus):
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "good"
-        advice = "🌞 Go outside, breathe some of that fresh air and enjoy this wonderful day."
-    elif 51 <= aqius <= 100:
-        verdict = "moderate"
-        advice = "😷 It's fine to go outside but make sure to keep updated with us for the latest air quality news. Also, while not necessary, wear or bring a mask just in case."
-    elif 101 <= aqius <= 150:
-        verdict = "unhealthy for sensitive groups"
-        advice = "⚠️ If you're part of a sensitive group, such as children, the elderly, or those with respiratory issues, minimize prolonged outdoor activities and consider wearing a mask if necessary."
-    elif 151 <= aqius <= 200:
-        verdict = "unhealthy"
-        advice = "🚫 Limit outdoor activities to a minimum. Stay indoors as much as possible, and use air purifiers if available. Everyone, not just sensitive groups, should take precautions."
-    elif 201 <= aqius <= 300:
-        verdict = "very unhealthy"
-        advice = "❗ The air quality poses a serious health risk to everyone. Avoid going outdoors unless absolutely necessary, and wear a high-quality mask if you need to step outside. Follow health advisories closely."
-    elif aqius > 300:
-        verdict = "hazardous"
-        advice = "🚨 Emergency conditions! Stay indoors with windows and doors shut. Avoid physical exertion, and follow any official instructions. If available, use air purifiers to improve indoor air quality."
-    else:
-        verdict = "invalid AQI value"
-        advice = "❓ Please provide a valid AQI value to receive air quality advice."
-    return (
-        f'''
-🌅 Good morning, ladies and gentlemen. I hope you have had a restful sleep and are eager to begin the new day. The air today is at a **{aqius}**, which means it's **{verdict}**. {advice}
+    morning_message= lambda self,aqius,: ({
+        "en":f'''
+🌅 Good morning, ladies and gentlemen. I hope you have had a restful sleep and are eager to begin the new day. The air today is at a **{aqius}**, which means it's **{self.verdict[get_aqi_category(aqius)]["en"]}**. {self.advice[get_aqi_category(aqius)]["en"]}
+''',
+        "kh":f'''
+🌅 អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{self.verdict[get_aqi_category(aqius)]["kh"]}**។ **{self.advice[get_aqi_category(aqius)]["kh"]}**
+''',
+"jp":        f'''
+🌅 おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{self.verdict[get_aqi_category(aqius)]["jp"]}」**の状態です。**{self.advice[get_aqi_category(aqius)]["jp"]}**
+    ''',
+    "de":        f'''
+🌅 Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{self.verdict[get_aqi_category(aqius)]["de"]}** ist. **{self.advice[get_aqi_category(aqius)]["de"]}**
 '''
+    })
+
+
+    signoff= lambda :(
+        {
+    "en": " \n🌙 It's currently 21:00 and it's time for me to sign off. 💤 I will see you again tomorrow at 6 onwards to give you more updates on the air quality. 🌍 This has been intell1slt_bot at your service. 🌟 Good night! 🌌\n",
+    "kh": " \n🌙 បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មថ្ងៃនេះ។ 💤 ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ 🌍 នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ 🌟 សុបិន្តល្អ! 🌌\n",
+    "jp": " \n🌙 こんばんは、みなさん！今は21:00になりましたので、今日はこれでおやすみします。 💤 明日の朝6時から、また空気の質に関する情報をお届けします。 🌍 これまでお付き合いいただきありがとうございました。intell1slt_botより、良い夜をお過ごしください。 🌟 おやすみなさい！ 🌌\n",
+    "de": " \n🌙 Es ist jetzt 21:00 Uhr und Zeit für mich, mich für heute zu verabschieden. 💤 Ich bin morgen ab 6 Uhr wieder da, um Ihnen weitere Updates zur Luftqualität zu geben. 🌍 Dies war intell1slt_bot, zu Ihren Diensten. 🌟 Gute Nacht! 🌌\n"
+    }
     )
-
-def morning_message_kh(aqius, mainus):
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "ល្អ"
-        advice = "🌞 ចេញក្រៅដោយមិនមានការព្រួយបារម្ភ រីករាយជាមួយខ្យល់បរិសុទ្ធ ហើយរីករាយជាមួយថ្ងៃដ៏អស្ចារ្យនេះ។"
-    elif 51 <= aqius <= 100:
-        verdict = "មធ្យម"
-        advice = "😷 អាចចេញក្រៅបាន ប៉ុន្តែសូមតាមដានព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់ពីយើង។ អ្នកក៏អាចពាក់ ឬយកម៉ាស់តាមផង ដើម្បីការពារសុខភាព។"
-    elif 101 <= aqius <= 150:
-        verdict = "មិនល្អសម្រាប់ក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់"
-        advice = "⚠️ ប្រសិនបើអ្នកជាក្រុមអ្នកងាយនឹងទទួលផលប៉ះពាល់ ដូចជា កុមារ អ្នកចាស់ ឬអ្នកមានបញ្ហាសុខភាពផ្នែកផ្លូវដង្ហើម សូមកំុការចេញក្រៅច្រើន។ គិតពី​ការពាក់ម៉ាស់ផងប្រសិនបើចាំបាច់។"
-    elif 151 <= aqius <= 200:
-        verdict = "មិនល្អ"
-        advice = "🚫 កាត់បន្ថយសកម្មភាពខាងក្រៅ​ គួរប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ មនុស្សគ្រប់ក្រុមគួរមានការប្រុងប្រយ័ត្ន។"
-    elif 201 <= aqius <= 300:
-        verdict = "អាក្រក់ខ្លាំង"
-        advice = "❗ គុណភាពខ្យល់ផ្តល់នូវហានិភ័យដល់សុខភាពសម្រាប់អ្នកគ្រប់គ្នា កុំចេញក្រៅលើកលែងតែមានភាពចាំបាច់ ហើយគួរពាក់ម៉ាស់ដែលមានគុណភាពខ្ពស់។"
-    elif aqius > 300:
-        verdict = "គ្រាអាសន្ន"
-        advice = "🚨 ស្ថានភាពអាសន្ន! សូមនៅក្នុងផ្ទះ បិទបង្អួចនិងទ្វារឲ្យជិត​ និង សូមប្រើប្រាស់ម៉ាសុីនខ្យល់បរិសុទ្ធ។"
-    return (
-        f'''
-🌅 អរុណសួស្តី លោកនិងលោកស្រី ខ្ញុំសូមសង្ឃឹមថាអ្នកមានការគេងសំរានជ្រាលជ្រៅ ហើយត្រៀមខ្លួនដើម្បីចាប់ផ្តើមថ្ងៃថ្មី។ ខ្យល់សព្វថ្ងៃនេះមានពិន្ទុ **{aqius}** ដែលមានន័យថា **{verdict}**។ **{advice}**
-'''
-    )
-
-def morning_message_jp(aqius, mainus):
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "良い (Good)"
-        advice = "🌞 外に出て、新鮮な空気を吸い、この素晴らしい日を楽しみましょう！"
-    elif 51 <= aqius <= 100:
-        verdict = "普通 (Moderate)"
-        advice = "😷 外に出ても大丈夫ですが、最新の空気質情報をチェックするようにしてください。必要ではありませんが、念のためにマスクを持参または着用してください。"
-    elif 101 <= aqius <= 150:
-        verdict = "敏感な人にとっては不健康 (Unhealthy for Sensitive Groups)"
-        advice = "⚠️ 子供、高齢者、または呼吸器系の問題を抱える敏感なグループに属している場合は、長時間の屋外活動を控え、必要に応じてマスクを着用してください。"
-    elif 151 <= aqius <= 200:
-        verdict = "不健康 (Unhealthy)"
-        advice = "🚫 屋外活動を最小限に抑え、可能であれば室内にいるようにしてください。また、空気清浄機を使用すると良いでしょう。全員が予防措置を講じる必要があります。"
-    elif 201 <= aqius <= 300:
-        verdict = "非常に不健康 (Very Unhealthy)"
-        advice = "❗ 空気質が健康に深刻なリスクをもたらします。絶対に必要でない限り外に出ないようにし、外出する場合は高性能のマスクを着用してください。公的な健康指導に従ってください。"
-    elif aqius > 300:
-        verdict = "危険 (Hazardous)"
-        advice = "🚨 非常事態です！屋内に留まり、窓とドアをしっかりと閉めてください。身体を動かさないようにし、公式の指示に従ってください。空気清浄機があれば使用してください。"
-    else:
-        verdict = "無効なAQI値"
-        advice = "❓ 有効なAQI値を入力してください。"
-    return (
-        f'''
-🌅 おはようございます、みなさん！昨晩はぐっすり眠れましたか？今日の空気の指数 (AQI) は **{aqius}** で、**「{verdict}」**の状態です。**{advice}**
-    '''
-    )
-
-def morning_message_de(aqius, mainus):
-    verdict, advice = "", ""
-    if 0 <= aqius <= 50:
-        verdict = "Gut (Good)"
-        advice = "🌞 Gehen Sie nach draußen, atmen Sie die frische Luft ein und genießen Sie diesen wunderbaren Tag!"
-    elif 51 <= aqius <= 100:
-        verdict = "Mäßig (Moderate)"
-        advice = "😷 Es ist in Ordnung, nach draußen zu gehen, aber halten Sie sich über die neuesten Nachrichten zur Luftqualität auf dem Laufenden. Auch wenn es nicht unbedingt erforderlich ist, nehmen oder tragen Sie sicherheitshalber eine Maske."
-    elif 101 <= aqius <= 150:
-        verdict = "Ungesund für empfindliche Gruppen (Unhealthy for Sensitive Groups)"
-        advice = "⚠️ Wenn Sie zu einer empfindlichen Gruppe gehören, wie z. B. Kinder, ältere Menschen oder Personen mit Atemwegsproblemen, sollten Sie längere Aufenthalte im Freien vermeiden und bei Bedarf eine Maske tragen."
-    elif 151 <= aqius <= 200:
-        verdict = "Ungesund (Unhealthy)"
-        advice = "🚫 Reduzieren Sie Aktivitäten im Freien auf ein Minimum. Bleiben Sie möglichst in Innenräumen und verwenden Sie, wenn verfügbar, Luftreiniger. Nicht nur empfindliche Gruppen sollten Vorsichtsmaßnahmen treffen, sondern alle."
-    elif 201 <= aqius <= 300:
-        verdict = "Sehr ungesund (Very Unhealthy)"
-        advice = "❗ Die Luftqualität stellt ein ernstes Gesundheitsrisiko für alle dar. Vermeiden Sie den Aufenthalt im Freien, es sei denn, es ist absolut notwendig. Tragen Sie eine hochwertige Maske, wenn Sie nach draußen gehen müssen. Folgen Sie den Gesundheitsempfehlungen."
-    elif aqius > 300:
-        verdict = "Gefährlich (Hazardous)"
-        advice = "🚨 Notfallbedingungen! Bleiben Sie in Innenräumen und schließen Sie Fenster und Türen. Vermeiden Sie körperliche Anstrengung und folgen Sie offiziellen Anweisungen. Verwenden Sie, wenn möglich, Luftreiniger."
-    else:
-        verdict = "Ungültiger AQI-Wert"
-        advice = "❓ Bitte geben Sie einen gültigen AQI-Wert ein."
-    return (
-        f'''
-🌅 Guten Morgen, meine Damen und Herren. Ich hoffe, Sie hatten einen erholsamen Schlaf und sind bereit, den neuen Tag zu beginnen. Die Luft heute hat einen AQI von {aqius}, was bedeutet, dass sie **{verdict}** ist. **{advice}**
-'''
-    )
-
-
-def signoff_en():
-    return(
-f''' 
-🌙 It's currently 21:00 and it's time for me to sign off. 💤 I will see you again tomorrow at 6 onwards to give you more updates on the air quality. 🌍 This has been intell1slt_bot at your service. 🌟 Good night! 🌌
-''')
-
-def signoff_kh():
-    return(
-f''' 
-🌙 បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មថ្ងៃនេះ។ 💤 ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ 🌍 នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ 🌟 សុបិន្តល្អ! 🌌
-''')
-
-def signoff_jp():
-    return(
-f''' 
-🌙 こんばんは、みなさん！今は21:00になりましたので、今日はこれでおやすみします。 💤 明日の朝6時から、また空気の質に関する情報をお届けします。 🌍 これまでお付き合いいただきありがとうございました。intell1slt_botより、良い夜をお過ごしください。 🌟 おやすみなさい！ 🌌
-''')
-
-def signoff_de():
-    return(
-f''' 
-🌙 Es ist jetzt 21:00 Uhr und Zeit für mich, mich für heute zu verabschieden. 💤 Ich bin morgen ab 6 Uhr wieder da, um Ihnen weitere Updates zur Luftqualität zu geben. 🌍 Dies war intell1slt_bot, zu Ihren Diensten. 🌟 Gute Nacht! 🌌
-''')
+    
 
 
 
@@ -432,16 +381,17 @@ while True:
         aqius, mainus = get_phnom_penh_aq()
         image_file_name=get_aqi_category(aqius=aqius).replace(' ','_')+".png"
         print(image_file_name)
+        morning_message=Message.morning_message(aqius)
         message = f'''
                     {date}/{month}/{year} {hour}:{minute:02}\n
                     =====ភាសាខ្មែរ=====\n
-                    {morning_message_kh(aqius, mainus)}\n
+                    {morning_message["kh"]}\n
                     =====English=====\n
-                    {morning_message_en(aqius, mainus)}\n
+                    {morning_message["en"]}\n
                     =====Deutsch=====\n
-                    {morning_message_de(aqius, mainus)}\n
+                    {morning_message["de"]}\n
                     =====日本語=====\n
-                    {morning_message_jp(aqius, mainus)}
+                    {morning_message["jp"]}
                 '''
 
         # image_path =   # Path to the image file
