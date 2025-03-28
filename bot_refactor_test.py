@@ -109,18 +109,25 @@ class Message:
     def get_aqi_category(self,aqius):
     # Define AQI category ranges
         if 0 <= aqius <= 50:
+            #print(f"AQI category determined: good, AQI value: {aqius}")
             return "good"
         elif 51 <= aqius <= 100:
+            #print(f"AQI category determined: moderate, AQI value: {aqius}")
             return "moderate"
         elif 101 <= aqius <= 150:
+            #print(f"AQI category determined: unhealthy for sensitive groups, AQI value: {aqius}")
             return "unhealthy for sensitive groups"
         elif 151 <= aqius <= 200:
+            #print(f"AQI category determined: unhealthy, AQI value: {aqius}")
             return "unhealthy"
         elif 201 <= aqius <= 300:
+            #print(f"AQI category determined: very unhealthy, AQI value: {aqius}")
             return "very unhealthy"
         elif aqius > 300:
+            #print(f"AQI category determined: hazardous, AQI value: {aqius}")
             return "hazardous"
         else:
+            #print(f"AQI category determined: invalid, AQI value: {aqius}")
             return "invalid"
 
     
@@ -151,49 +158,72 @@ class Message:
 
     def update(self, aqius, mainus, aqius_prior, mainus_prior, hour, minute, change):
         category=self.get_aqi_category(aqius)
+        delta={
+            "improving": {
+                "en": "improving",
+                "kh": "ជាប្រសើរឡើង",
+                "jp": "向上",
+                "de": "besser"
+            },
+            "deteriorating": {
+                "en": "deteriorating",
+                "kh": "ជាការធ្លាក់ចុះ",
+                "jp": "悪化",
+                "de": "schlechter"
+            },
+            "stagnant": {
+                "en": "stagnant",
+                "kh": "មិនមានការផ្លាស់ប្តូរ",
+                "jp": "停滞",
+                "de": "stagnierend"
+            }
+
+        }
+
         mutate_state = "change" if change[0] != 'stagnant' and change[1] != "samecat" else "change_samecat" if change[0] != 'stagnant' else "samecat"
         minute= f"{int(minute):02}"  # Ensure minute is always 2 digits
         messages = {
             "samecat": {
             "en": f'''
-    Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{self.verdict[category]["en"]}** with an AQI score of **{aqius}**. {self.advice[category]["en"]}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{self.verdict[category]["en"]}** with an AQI score of **{aqius}**. {self.advice[category]["en"]}
             ''',
             "kh": f'''
-    បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{self.verdict[category]["kh"]}** ដោយមានតម្លៃ AQI **{aqius}**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{self.verdict[category]["kh"]}** ដោយមានតម្លៃ AQI **{aqius}**។ {self.advice[category]["kh"]}
             ''',
             "jp": f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{self.verdict[category]["jp"]}」**のままだね。AQIスコアは**{aqius}**だよ。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{self.verdict[category]["jp"]}」**のままだね。AQIスコアは**{aqius}**だよ。{self.advice[category]["jp"]}
             ''',
             "de": f'''
-    Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{self.verdict[category]["de"]}“**. Der AQI-Wert liegt bei **{aqius}**. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{self.verdict[category]["de"]}“**. Der AQI-Wert liegt bei **{aqius}**. {self.advice[category]["de"]}
             '''
             },
             "change_samecat": {
             "en": f'''
-    Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior}** to **{aqius}**, which is still **{self.verdict[category]["en"]}**. {self.advice[category]["en"]}
+
+                    Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior}** to **{aqius}**, which is still **{self.verdict[category]["en"]}**. {self.advice[category]["en"]}
             ''',
             "kh": f'''
-    បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលនៅតែជា **{self.verdict[category]["kh"]}**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលនៅតែជា **{self.verdict[category]["kh"]}**។ {self.advice[category]["kh"]}
             ''',
             "jp": f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態が**{change[0]}**で、**{aqius_prior}**から**{aqius}**に変わったけど、まだ**「{self.verdict[category]["jp"]}」**だね。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態が**{delta[change[0]]["jp"]}**で、**{aqius_prior}**から**{aqius}**に変わったけど、まだ**「{self.verdict[category]["jp"]}」**だね。{self.advice[category]["jp"]}
             ''',
             "de": f'''
-    Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{change[0]}** von **{aqius_prior}** auf **{aqius}** verändert, bleibt aber **„{self.verdict[category]["de"]}“**. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{delta[change[0]]["de"]}** von **{aqius_prior}** auf **{aqius}** verändert, bleibt aber **„{self.verdict[category]["de"]}“**. {self.advice[category]["de"]}
             '''
             },
             "change": {
             "en": f'''
-    Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{change[0]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. {self.advice[category]["en"]}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. {self.advice[category]["en"]}
             ''',
             "kh": f'''
-    បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{change[0]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius} ({change[2]})**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius} ({change[2]})**។ {self.advice[category]["kh"]}
             ''',
             "jp": f'''
-    今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{change[0]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{delta[change[0]]["jp"]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。{self.advice[category]["jp"]}
             ''',
             "de": f'''
-    Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{change[0]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{delta[change[0]]["de"]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. {self.advice[category]["de"]}
             '''
             }
         }
@@ -232,7 +262,8 @@ class Main:
         intell1slt_bot = telebot.TeleBot(self.BOT_TOKEN)
         try:
             # Send a startup message
-            intell1slt_bot.send_message(chat_id=self.CHAT_ID, text="intell1slt_bot is now online.")
+            # intell1slt_bot.send_message(chat_id=self.CHAT_ID, text="intell1slt_bot is now online.")
+            intell1slt_bot.send_message(chat_id=712191968, text="intell1slt_bot is now online.")
             print("Test message sent!")
         except telebot.apihelper.ApiTelegramException as e:
             print(f"Failed to send a message: {e}")
@@ -351,11 +382,12 @@ class Main:
             year = current_time.strftime("%Y")
 
             if (minute ==00) and (seconds == 0) and (hour == 6):
-                self.category=self.get_aqi_category(self.aqius)
+
                 print("Condition A is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
                 self.aqius, self.mainus = self.get_phnom_penh_aq()
                 image_file_name = self.get_image(self.aqius)
+                self.category=self.get_aqi_category(self.aqius)
                 morning_message=self.msg.morning_message(self.aqius)
                 message = f'''
                             {date}/{month}/{year} {hour}:{minute:02}\n
@@ -370,13 +402,14 @@ class Main:
                         '''
                 self.send_message(image_file_name,message)
             elif (minute % 5 == 0 and seconds == 0 and 6 <= hour < 21) or (hour == 21 and minute == 0 and seconds == 0):
-                self.category=self.get_aqi_category(self.aqius)
+                
                 print("Condition B is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
                 self.aqius, self.mainus = self.get_phnom_penh_aq()
+                self.category=self.get_aqi_category(self.aqius)
                 image_file_name = self.get_image(self.aqius)
                 self.change=None
-                print(f"Current AQI: {self.aqius}, Prior AQI: {self.aqius_prior}")
+                print(f"Current AQI: {self.aqius}, Prior AQI: {self.aqius_prior}, Category:{self.category} ")
                 
                 if self.aqius_prior==0:
                     self.aqius_prior = self.aqius
@@ -414,19 +447,20 @@ class Main:
                         self.send_message(image_file_name,message)
 
                 if (minute == 00) and (seconds == 00) and (hour == 21):
+                    time.sleep(5)
                     print("Condition C is triggering the goodbye call")
                     print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
                     signoff = self.msg.signoff()
                     print(signoff)
                     message = f'''
                     {date}/{month}/{year} {hour}:{minute:02}\n
-                        =====ភាសាខ្មែរ=====\n
+                            =====ភាសាខ្មែរ=====\n
 {signoff["kh"]}\n
-                        =====English=====\n
+                            =====English=====\n
 {signoff["en"]}\n
-                        =====Deutsch=====\n
+                            =====Deutsch=====\n
 {signoff["de"]}\n
-                        =====日本語=====\n
+                            =====日本語=====\n
 {signoff["jp"]}
                     '''
                     self.send_only_message(message)
