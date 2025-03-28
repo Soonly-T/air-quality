@@ -382,29 +382,35 @@ class Main:
                     self.aqius_prior = self.aqius
                     self.mainus_prior = self.mainus
 
-                message= self.update(date,month,year,hour,minute)
+                message=""
 
                 if self.category == "good":
                     if (minute % 60 == 0) and (seconds == 0) and (hour%2==0):
+                        message= self.update(date,month,year,hour,minute)
                         self.send_message(image_file_name,message)
                 elif self.category == "moderate":
                     if (minute % 60 == 0) and (seconds == 0):
+                        message= self.update(date,month,year,hour,minute)
                         self.send_message(image_file_name,message)
 
                 elif self.category == "unhealthy for sensitive groups":
                     if (minute % 30 == 0) and (seconds == 0):
+                        message= self.update(date,month,year,hour,minute)
                         self.send_message(image_file_name,message)
 
                 elif self.category == "unhealthy":
                     if (minute % 15 == 0) and (seconds == 0):
+                        message= self.update(date,month,year,hour,minute)
                         self.send_message(image_file_name,message)
 
                 elif self.category == "very unhealthy":
                     if (minute % 10 == 0) and (seconds == 0):
+                        message= self.update(date,month,year,hour,minute)
                         self.send_message(image_file_name,message)
 
                 elif self.category == "hazardous":
                     if (minute % 5 == 0) and (seconds == 0):
+                        message= self.update(date,month,year,hour,minute)
                         self.send_message(image_file_name,message)
 
                 if (minute == 00) and (seconds == 00) and (hour == 21):
