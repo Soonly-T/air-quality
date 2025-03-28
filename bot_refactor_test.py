@@ -142,10 +142,10 @@ class Message:
 
     signoff= lambda self :(
         {
-    "en": " \n🌙 It's currently 21:00 and it's time for me to sign off. 💤 I will see you again tomorrow at 6 onwards to give you more updates on the air quality. 🌍 This has been intell1slt_bot at your service. 🌟 Good night! 🌌\n",
-    "kh": " \n🌙 បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មថ្ងៃនេះ។ 💤 ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ 🌍 នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ 🌟 សុបិន្តល្អ! 🌌\n",
-    "jp": " \n🌙 こんばんは、みなさん！今は21:00になりましたので、今日はこれでおやすみします。 💤 明日の朝6時から、また空気の質に関する情報をお届けします。 🌍 これまでお付き合いいただきありがとうございました。intell1slt_botより、良い夜をお過ごしください。 🌟 おやすみなさい！ 🌌\n",
-    "de": " \n🌙 Es ist jetzt 21:00 Uhr und Zeit für mich, mich für heute zu verabschieden. 💤 Ich bin morgen ab 6 Uhr wieder da, um Ihnen weitere Updates zur Luftqualität zu geben. 🌍 Dies war intell1slt_bot, zu Ihren Diensten. 🌟 Gute Nacht! 🌌\n"
+    "en": "🌙 It's currently 21:00 and it's time for me to sign off. 💤 I will see you again tomorrow at 6 onwards to give you more updates on the air quality. 🌍 This has been intell1slt_bot at your service. 🌟 Good night! 🌌",
+    "kh": "🌙 បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មថ្ងៃនេះ។ 💤 ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ 🌍 នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ 🌟 សុបិន្តល្អ! 🌌",
+    "jp": "🌙 こんばんは、みなさん！今は21:00になりましたので、今日はこれでおやすみします。 💤 明日の朝6時から、また空気の質に関する情報をお届けします。 🌍 これまでお付き合いいただきありがとうございました。intell1slt_botより、良い夜をお過ごしください。 🌟 おやすみなさい！ 🌌",
+    "de": "🌙 Es ist jetzt 21:00 Uhr und Zeit für mich, mich für heute zu verabschieden. 💤 Ich bin morgen ab 6 Uhr wieder da, um Ihnen weitere Updates zur Luftqualität zu geben. 🌍 Dies war intell1slt_bot, zu Ihren Diensten. 🌟 Gute Nacht! 🌌"
     }
     )
 
@@ -421,13 +421,13 @@ class Main:
                     message = f'''
                     {date}/{month}/{year} {hour}:{minute:02}\n
                         =====ភាសាខ្មែរ=====\n
-                        {signoff["kh"]}\n
+{signoff["kh"]}\n
                         =====English=====\n
-                        {signoff["en"]}\n
+{signoff["en"]}\n
                         =====Deutsch=====\n
-                        {signoff["de"]}\n
+{signoff["de"]}\n
                         =====日本語=====\n
-                        {signoff["jp"]}
+{signoff["jp"]}
                     '''
                     self.send_only_message(message)
                 time.sleep(65)
