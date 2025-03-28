@@ -140,7 +140,7 @@ class Message:
     })
 
 
-    signoff= lambda :(
+    signoff= lambda self :(
         {
     "en": " \n🌙 It's currently 21:00 and it's time for me to sign off. 💤 I will see you again tomorrow at 6 onwards to give you more updates on the air quality. 🌍 This has been intell1slt_bot at your service. 🌟 Good night! 🌌\n",
     "kh": " \n🌙 បច្ចុប្បន្ននេះម៉ោង 21:00 ហើយបានដល់ពេលដែលខ្ញុំត្រូវបញ្ចប់សេវាកម្មថ្ងៃនេះ។ 💤 ខ្ញុំនឹងជួបអ្នកវិញនៅថ្ងៃស្អែកចាប់ពីម៉ោង 6 ដើម្បីផ្តល់ព័ត៌មានថ្មីៗអំពីគុណភាពខ្យល់។ 🌍 នេះគឺជា​ intell1slt_bot ដែលបានបម្រើសេវាកម្មសម្រាប់លោកអ្នក។ 🌟 សុបិន្តល្អ! 🌌\n",
@@ -350,7 +350,7 @@ class Main:
             date = int(current_time.strftime("%d"))
             year = current_time.strftime("%Y")
 
-            if (minute ==0) and (seconds == 0) and (hour == 6):
+            if (minute ==00) and (seconds == 0) and (hour == 6):
                 self.category=self.get_aqi_category(self.aqius)
                 print("Condition A is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -369,7 +369,7 @@ class Main:
                             {morning_message["jp"]}
                         '''
                 self.send_message(image_file_name,message)
-            elif (minute % 5 == 0) and (seconds == 0) and (6 <= hour <= 21): #
+            elif (minute % 5 == 0 and seconds == 0 and 6 <= hour < 21) or (hour == 21 and minute == 0 and seconds == 0):
                 self.category=self.get_aqi_category(self.aqius)
                 print("Condition B is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -385,7 +385,8 @@ class Main:
                 message= self.update(date,month,year,hour,minute)
 
                 if self.category == "good":
-                    pass
+                    if (minute % 60 == 0) and (seconds == 0) and (hour%2==0):
+                        self.send_message(image_file_name,message)
                 elif self.category == "moderate":
                     if (minute % 60 == 0) and (seconds == 0):
                         self.send_message(image_file_name,message)
@@ -406,25 +407,26 @@ class Main:
                     if (minute % 5 == 0) and (seconds == 0):
                         self.send_message(image_file_name,message)
 
+                if (minute == 35) and (seconds == 00) and (hour == 9):
+                    print("Condition C is triggering the goodbye call")
+                    print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
+                    signoff = self.msg.signoff()
+                    print(signoff)
+                    message = f'''
+                    {date}/{month}/{year} {hour}:{minute:02}\n
+                        =====ភាសាខ្មែរ=====\n
+                        {signoff["kh"]}\n
+                        =====English=====\n
+                        {signoff["en"]}\n
+                        =====Deutsch=====\n
+                        {signoff["de"]}\n
+                        =====日本語=====\n
+                        {signoff["jp"]}
+                    '''
+                    self.send_only_message(message)
                 time.sleep(65)
-                
-
-            if (minute == 4) and (seconds == 30) and (hour == 21):
-                print("Condition C is triggering the API call")
-                print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
-
-                message = f'''
-                {date}/{month}/{year} {hour}:{minute:02}\n
-                    =====ភាសាខ្មែរ=====\n
-                    {self.msg.signoff["kh"]}\n
-                    =====English=====\n
-                    {self.msg.signoff["en"]}\n
-                    =====Deutsch=====\n
-                    {self.msg.signoff["de"]}\n
-                    =====日本語=====\n
-                    {self.msg.signoff["jp"]}
-                '''
-                self.send_only_message(message)
+            
+    
             time.sleep(0.1)
 
 
