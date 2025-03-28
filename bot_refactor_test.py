@@ -376,10 +376,12 @@ class Main:
                 self.aqius, self.mainus = self.get_phnom_penh_aq()
                 image_file_name = self.get_image(self.aqius)
                 self.change=None
+                print(f"Current AQI: {self.aqius}, Prior AQI: {self.aqius_prior}")
                 
                 if self.aqius_prior==0:
                     self.aqius_prior = self.aqius
                     self.mainus_prior = self.mainus
+
                 message= self.update(date,month,year,hour,minute)
 
                 if self.category == "good":
@@ -405,7 +407,7 @@ class Main:
                         self.send_message(image_file_name,message)
 
                 time.sleep(65)
-                print(f"Current AQI: {self.aqius}, Prior AQI: {self.aqius_prior}")
+                
 
             if (minute == 4) and (seconds == 30) and (hour == 21):
                 print("Condition C is triggering the API call")
