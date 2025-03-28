@@ -407,7 +407,7 @@ class Main:
                     if (minute % 5 == 0) and (seconds == 0):
                         self.send_message(image_file_name,message)
 
-                if (minute == 35) and (seconds == 00) and (hour == 9):
+                if (minute == 00) and (seconds == 00) and (hour == 21):
                     print("Condition C is triggering the goodbye call")
                     print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
                     signoff = self.msg.signoff()
