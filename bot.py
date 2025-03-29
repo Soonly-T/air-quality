@@ -160,13 +160,13 @@ class Message:
         category=self.get_aqi_category(aqius)
         delta={
             "improving": {
-                "en": "improving",
+                "en": "improved",
                 "kh": "ជាប្រសើរឡើង",
                 "jp": "向上",
                 "de": "besser"
             },
             "deteriorating": {
-                "en": "deteriorating",
+                "en": "deteriorated",
                 "kh": "ជាការធ្លាក់ចុះ",
                 "jp": "悪化",
                 "de": "schlechter"
@@ -214,16 +214,16 @@ class Message:
             },
             "change": {
             "en": f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. {self.advice[category]["en"]}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior} ({self.get_aqi_category(aqius_prior)["en"]})** to **{aqius} ({self.get_aqi_category(aqius)["en"]})**. {self.advice[category]["en"]}
             ''',
             "kh": f'''
-        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius} ({change[2]})**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior} ({self.get_aqi_category(aqius_prior)["kh"]})** ទៅ **{aqius} ({self.get_aqi_category(aqius)["kh"]})**។ {self.advice[category]["kh"]}
             ''',
             "jp": f'''
-        今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{delta[change[0]]["jp"]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{delta[change[0]]["jp"]}**で、**{aqius_prior}（{self.get_aqi_category(aqius_prior)["jp"]}）**から**{aqius}（{self.get_aqi_category(aqius)["jp"]}）**に変わったんだ。{self.advice[category]["jp"]}
             ''',
             "de": f'''
-        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{delta[change[0]]["de"]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{delta[change[0]]["de"]}** von **{aqius_prior} ({self.get_aqi_category(aqius_prior)["de"]})** zu **{aqius} ({self.get_aqi_category(aqius)["de"]})** geworden. {self.advice[category]["de"]}
             '''
             }
         }
