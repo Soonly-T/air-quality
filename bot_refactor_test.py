@@ -11,6 +11,8 @@ import json
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 weekends = ["Friday", "Saturday", "Sunday"]
 
+PRIVATE_KEY=712191968
+
 
 
 class Message:
@@ -160,13 +162,13 @@ class Message:
         category=self.get_aqi_category(aqius)
         delta={
             "improving": {
-                "en": "improving",
+                "en": "improved",
                 "kh": "ជាប្រសើរឡើង",
                 "jp": "向上",
                 "de": "besser"
             },
             "deteriorating": {
-                "en": "deteriorating",
+                "en": "deteriorated",
                 "kh": "ជាការធ្លាក់ចុះ",
                 "jp": "悪化",
                 "de": "schlechter"
@@ -185,45 +187,45 @@ class Message:
         messages = {
             "samecat": {
             "en": f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{self.verdict[category]["en"]}** with an AQI score of **{aqius}**. {self.advice[category]["en"]}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality is still **{self.verdict[self.get_aqi_category(aqius)]["en"]}** with an AQI score of **{aqius}**. {self.advice[self.get_aqi_category(aqius)]["en"]}
             ''',
             "kh": f'''
-        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{self.verdict[category]["kh"]}** ដោយមានតម្លៃ AQI **{aqius}**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់នៅតែជា **{self.verdict[self.get_aqi_category(aqius)]["kh"]}** ដោយមានតម្លៃ AQI **{aqius}**។ {self.advice[self.get_aqi_category(aqius)]["kh"]}
             ''',
             "jp": f'''
-        今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{self.verdict[category]["jp"]}」**のままだね。AQIスコアは**{aqius}**だよ。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態は変わらず**「{self.verdict[self.get_aqi_category(aqius)]["jp"]}」**のままだね。AQIスコアは**{aqius}**だよ。{self.advice[self.get_aqi_category(aqius)]["jp"]}
             ''',
             "de": f'''
-        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{self.verdict[category]["de"]}“**. Der AQI-Wert liegt bei **{aqius}**. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität ist unverändert und bleibt **„{self.verdict[self.get_aqi_category(aqius)]["de"]}“**. Der AQI-Wert liegt bei **{aqius}**. {self.advice[self.get_aqi_category(aqius)]["de"]}
             '''
             },
             "change_samecat": {
             "en": f'''
 
-                    Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior}** to **{aqius}**, which is still **{self.verdict[category]["en"]}**. {self.advice[category]["en"]}
+            Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior}** to **{aqius}**, which is still **{self.verdict[self.get_aqi_category(aqius)]["en"]}**. {self.advice[self.get_aqi_category(aqius)]["en"]}
             ''',
             "kh": f'''
-        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលនៅតែជា **{self.verdict[category]["kh"]}**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior}** ទៅ **{aqius}** ដែលនៅតែជា **{self.verdict[self.get_aqi_category(aqius)]["kh"]}**។ {self.advice[self.get_aqi_category(aqius)]["kh"]}
             ''',
             "jp": f'''
-        今の時間は{hour}時{minute}分だよ！空気の状態が**{delta[change[0]]["jp"]}**で、**{aqius_prior}**から**{aqius}**に変わったけど、まだ**「{self.verdict[category]["jp"]}」**だね。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態が**{delta[change[0]]["jp"]}**で、**{aqius_prior}**から**{aqius}**に変わったけど、まだ**「{self.verdict[self.get_aqi_category(aqius)]["jp"]}」**だね。{self.advice[self.get_aqi_category(aqius)]["jp"]}
             ''',
             "de": f'''
-        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{delta[change[0]]["de"]}** von **{aqius_prior}** auf **{aqius}** verändert, bleibt aber **„{self.verdict[category]["de"]}“**. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich **{delta[change[0]]["de"]}** von **{aqius_prior}** auf **{aqius}** verändert, bleibt aber **„{self.verdict[self.get_aqi_category(aqius)]["de"]}“**. {self.advice[self.get_aqi_category(aqius)]["de"]}
             '''
             },
             "change": {
             "en": f'''
-        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior} ({change[1]})** to **{aqius} ({change[2]})**. {self.advice[category]["en"]}
+        Currently, it is {hour}:{minute} with an update to the air quality. The air quality has **{delta[change[0]]["en"]}** from **{aqius_prior} ({self.verdict[self.get_aqi_category(aqius_prior)]["en"]})** to **{aqius} ({self.verdict[self.get_aqi_category(aqius)]["en"]})**. {self.advice[self.get_aqi_category(aqius)]["en"]}
             ''',
             "kh": f'''
-        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior} ({change[1]})** ទៅ **{aqius} ({change[2]})**។ {self.advice[category]["kh"]}
+        បច្ចុប្បន្ន ម៉ោង {hour}:{minute} មានការអាប់ដេតអំពីគុណភាពខ្យល់។ គុណភាពខ្យល់មានការផ្លាស់ប្តូរ **{delta[change[0]]["kh"]}** ពី **{aqius_prior} ({self.verdict[self.get_aqi_category(aqius_prior)]["kh"]})** ទៅ **{aqius} ({self.verdict[self.get_aqi_category(aqius)]["kh"]})**។ {self.advice[self.get_aqi_category(aqius)]["kh"]}
             ''',
             "jp": f'''
-        今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{delta[change[0]]["jp"]}**で、**{aqius_prior}（{change[1]}）**から**{aqius}（{change[2]}）**に変わったんだ。{self.advice[category]["jp"]}
+        今の時間は{hour}時{minute}分だよ！空気の状態が変わったよ。**{delta[change[0]]["jp"]}**で、**{aqius_prior}（{self.verdict[self.get_aqi_category(aqius_prior)]["jp"]}）**から**{aqius}（{self.verdict[self.get_aqi_category(aqius)]["jp"]}）**に変わったんだ。{self.advice[self.get_aqi_category(aqius)]["jp"]}
             ''',
             "de": f'''
-        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{delta[change[0]]["de"]}** von **{aqius_prior} ({change[1]})** zu **{aqius} ({change[2]})** geworden. {self.advice[category]["de"]}
+        Es ist gerade {hour}:{minute} Uhr! Die Luftqualität hat sich geändert. Sie ist **{delta[change[0]]["de"]}** von **{aqius_prior} ({self.verdict[self.get_aqi_category(aqius_prior)]["de"]})** zu **{aqius} ({self.verdict[self.get_aqi_category(aqius)]["de"]})** geworden. {self.advice[self.get_aqi_category(aqius)]["de"]}
             '''
             }
         }
@@ -241,20 +243,20 @@ class Main:
 
     def __init__(self):
         with open("./keys.json","r") as file:
-            keys=json.load(file)
-
-        self.API_KEY=keys["iqair_api"]
-        self.BOT_TOKEN = keys["bot_token"]
-        self.CHAT_ID = keys["chat_id"]
+            self.keys=json.load(file)
+        self.API_KEY=self.keys["iqair_api"]
+        self.BOT_TOKEN = self.keys["bot_token"]
+        self.CHAT_ID = PRIVATE_KEY
         self.message = ""
         self.aqius=0
         self.mainus=""
-        self.aqius_prior=0
+        self.aqius_prior=self.keys["aqius_prior"]
         self.mainus_prior=""
         self.intell1slt_bot=self.initializeBot()
         self.msg=Message()
         self.change = None
         self.category=""
+        
         # self.intell1slt_bot.send_message(chat_id=self.CHAT_ID, text="This is a test message from intell1slt bot!")
 
         
@@ -366,9 +368,15 @@ class Main:
             {self.msg.update(self.aqius, self.mainus, self.aqius_prior, self.mainus_prior, hour, f"{minute:02}", self.change)["jp"]}
 
         '''
+        self.update_keys("aqius_prior", self.aqius)
         self.aqius_prior = self.aqius
         self.mainus_prior = self.mainus
         return message
+    def update_keys(self, key, value):
+        """Update a specific key in the keys.json file and the in-memory dictionary."""
+        self.keys[key] = value
+        with open("./keys.json", "w") as file:
+            json.dump(self.keys, file, indent=4)
     def main(self):
         while True:
             # Fetch the current time and extract components
@@ -388,6 +396,7 @@ class Main:
                 self.aqius, self.mainus = self.get_phnom_penh_aq()
                 image_file_name = self.get_image(self.aqius)
                 self.category=self.get_aqi_category(self.aqius)
+                self.update_keys("aqius_prior", 0)
                 morning_message=self.msg.morning_message(self.aqius)
                 message = f'''
                             {date}/{month}/{year} {hour}:{minute:02}\n
@@ -401,7 +410,7 @@ class Main:
                             {morning_message["jp"]}
                         '''
                 self.send_message(image_file_name,message)
-            elif (minute % 5 == 0 and seconds == 0 and 6 <= hour < 21) or (hour == 21 and minute == 0 and seconds == 0):
+            elif (minute % 5 == 0 and seconds == 0 and 6 <= hour < 23) or (hour == 21 and minute == 0 and seconds == 0):
                 
                 print("Condition B is triggering the API call")
                 print(f"API Called at {hour:02}:{minute:02}:{seconds:02} on {day}")
@@ -413,6 +422,10 @@ class Main:
                 
                 if self.aqius_prior==0:
                     self.aqius_prior = self.aqius
+                    self.keys["aqius_prior"] = self.aqius
+                    self.update_keys("aqius_prior", self.aqius)
+
+
                     self.mainus_prior = self.mainus
 
                 message=""
