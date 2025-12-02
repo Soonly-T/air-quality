@@ -11,7 +11,7 @@ import json
 weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday"]
 weekends = ["Friday", "Saturday", "Sunday"]
 
-PRIVATE_KEY=712191968
+
 
 
 
@@ -244,9 +244,9 @@ class Main:
     def __init__(self):
         with open("./keys.json","r") as file:
             self.keys=json.load(file)
-        self.API_KEY=self.keys["iqair_api"]
-        self.BOT_TOKEN = self.keys["bot_token"]
-        self.CHAT_ID = PRIVATE_KEY
+        self.API_KEY=os.getenv("API_KEY")
+        self.BOT_TOKEN = os.getenv("BOT_TOKEN")
+        self.CHAT_ID = os.getenv("CHAT_ID")
         self.message = ""
         self.aqius=0
         self.mainus=""
