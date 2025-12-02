@@ -1,11 +1,4 @@
-# AirVisual API Key
-API_KEY=88e45ac1-6083-478d-bac0-6523f4bc4c76
 
-# Telegram Bot Token
-BOT_TOKEN=8020379908:AAE5oD5MS73BnjcMKd2wSQrj34drgbo6w4s
-
-# Telegram Chat ID
-CHAT_ID=-1002684296791
 
 # Environment variables
 .env
