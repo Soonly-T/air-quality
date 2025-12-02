@@ -6,3 +6,6 @@ BOT_TOKEN=8020379908:AAE5oD5MS73BnjcMKd2wSQrj34drgbo6w4s
 
 # Telegram Chat ID
 CHAT_ID=-1002684296791
+
+# Environment variables
+.env
